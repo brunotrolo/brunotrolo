@@ -1,0 +1,51 @@
+<svg width="1200" height="240" viewBox="0 0 1200 240" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bruno Teixeira — Salesforce Architect, AI &amp; MCP Builder, Automation Engineer">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f0c29"/>
+      <stop offset="55%" stop-color="#302b63"/>
+      <stop offset="100%" stop-color="#24243e"/>
+    </linearGradient>
+    <linearGradient id="wave" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="50%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#A855F7"/>
+    </linearGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#C4B5FD"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Fundo -->
+  <rect width="1200" height="240" fill="url(#bg)"/>
+  <ellipse cx="600" cy="96" rx="460" ry="96" fill="url(#glow)"/>
+
+  <!-- Ondas animadas (auto-hospedadas, sem serviço externo) -->
+  <g>
+    <path fill="url(#wave)" opacity="0.30" d="M -240 190 q 60 -28 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 V 240 H -240 Z">
+      <animateTransform attributeName="transform" type="translate" values="0 0; -240 0" dur="10s" repeatCount="indefinite"/>
+    </path>
+    <path fill="url(#wave)" opacity="0.45" d="M -240 202 q 60 -22 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 V 240 H -240 Z">
+      <animateTransform attributeName="transform" type="translate" values="0 0; -240 0" dur="7s" repeatCount="indefinite"/>
+    </path>
+    <path fill="url(#wave)" opacity="0.65" d="M -240 214 q 60 -16 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 V 240 H -240 Z">
+      <animateTransform attributeName="transform" type="translate" values="0 0; -240 0" dur="5s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- Texto -->
+  <g text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+    <text x="600" y="104" fill="url(#title)" font-size="56" font-weight="800" letter-spacing="1">
+      Bruno Teixeira
+      <animate attributeName="opacity" from="0" to="1" dur="1.2s" fill="freeze"/>
+    </text>
+    <text x="600" y="146" fill="#C7D2FE" font-size="19" font-weight="500" letter-spacing="2">
+      Salesforce Architect &#160;&#8226;&#160; AI &amp; MCP Builder &#160;&#8226;&#160; Automation Engineer
+      <animate attributeName="opacity" from="0" to="1" begin="0.4s" dur="1.4s" fill="freeze"/>
+    </text>
+  </g>
+</svg>
