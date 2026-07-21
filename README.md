@@ -138,22 +138,16 @@ foco:      "Transformar processos complexos em automações elegantes"
 
 </div>
 
-<!--
-  🐍 BÔNUS: animação da "cobrinha" de contribuições.
-  Para ativar:
-    1. Habilite GitHub Actions no repositório (aba Actions).
-    2. Confirme que este README vive no repo de perfil "brunotrolo/brunotrolo".
-    3. Aguarde o workflow .github/workflows/snake.yml rodar (roda a cada 12h ou manualmente).
-    4. Descomente o bloco abaixo. Se o repo tiver outro nome, ajuste a URL.
--->
-<!--
+<!-- 🐍 Animação da cobrinha comendo o gráfico de contribuições (gerada por .github/workflows/snake.yml) -->
+### 🐍 Minhas contribuições viram um jogo
+
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/brunotrolo/brunotrolo/output/github-contribution-grid-snake-dark.svg" />
-    <img alt="Cobrinha de contribuições do GitHub de Bruno Teixeira" src="https://raw.githubusercontent.com/brunotrolo/brunotrolo/output/github-contribution-grid-snake.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/brunotrolo/brunotrolo/output/github-contribution-grid-snake.svg" />
+    <img alt="Animação da cobrinha comendo o gráfico de contribuições do GitHub de Bruno Teixeira" src="https://raw.githubusercontent.com/brunotrolo/brunotrolo/output/github-contribution-grid-snake.svg" />
   </picture>
 </div>
--->
 
 <br/>
 
