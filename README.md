@@ -65,10 +65,10 @@ foco:      "Transformar processos complexos em automações elegantes"
 <div align="center">
 
 #### ☁️ Salesforce
-![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)
-![Apex](https://img.shields.io/badge/Apex-1798C1?style=for-the-badge&logo=salesforce&logoColor=white)
+![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+U2FsZXNmb3JjZTwvdGl0bGU+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZD0iTTEwLjAwNiA1LjQxNWE0LjE5NSA0LjE5NSAwIDAxMy4wNDUtMS4zMDZjMS41NiAwIDIuOTU0LjkgMy42OSAyLjIwNS42My0uMyAxLjM1LS40NSAyLjEtLjQ1IDIuODUgMCA1LjE1OSAyLjM0IDUuMTU5IDUuMjJzLTIuMzEgNS4yMi01LjE3NiA1LjIyYy0uMzQ1IDAtLjY5LS4wNDQtMS4wMi0uMTA0YTMuNzUgMy43NSAwIDAxLTMuMyAxLjk1Yy0uNiAwLTEuMTU1LS4xNS0xLjY1LS4zNzVBNC4zMTQgNC4zMTQgMCAwMTguODggMjAuNGE0LjMwMiA0LjMwMiAwIDAxLTQuMDUtMi44MmMtLjI3LjA2Mi0uNTQuMDc2LS44MjUuMDc2LTIuMjA0IDAtNC4wMDUtMS44LTQuMDA1LTQuMDUgMC0xLjUuODExLTIuODA1IDIuMDEtMy41MS0uMjU1LS41Ny0uMzktMS4yLS4zOS0xLjg0NiAwLTIuNTggMi4xLTQuNjUgNC42NS00LjY1IDEuNTMgMCAyLjg1LjcwNSAzLjcyIDEuOCIvPjwvc3ZnPgo=&logoColor=white)
+![Apex](https://img.shields.io/badge/Apex-1798C1?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+U2FsZXNmb3JjZTwvdGl0bGU+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZD0iTTEwLjAwNiA1LjQxNWE0LjE5NSA0LjE5NSAwIDAxMy4wNDUtMS4zMDZjMS41NiAwIDIuOTU0LjkgMy42OSAyLjIwNS42My0uMyAxLjM1LS40NSAyLjEtLjQ1IDIuODUgMCA1LjE1OSAyLjM0IDUuMTU5IDUuMjJzLTIuMzEgNS4yMi01LjE3NiA1LjIyYy0uMzQ1IDAtLjY5LS4wNDQtMS4wMi0uMTA0YTMuNzUgMy43NSAwIDAxLTMuMyAxLjk1Yy0uNiAwLTEuMTU1LS4xNS0xLjY1LS4zNzVBNC4zMTQgNC4zMTQgMCAwMTguODggMjAuNGE0LjMwMiA0LjMwMiAwIDAxLTQuMDUtMi44MmMtLjI3LjA2Mi0uNTQuMDc2LS44MjUuMDc2LTIuMjA0IDAtNC4wMDUtMS44LTQuMDA1LTQuMDUgMC0xLjUuODExLTIuODA1IDIuMDEtMy41MS0uMjU1LS41Ny0uMzktMS4yLS4zOS0xLjg0NiAwLTIuNTggMi4xLTQuNjUgNC42NS00LjY1IDEuNTMgMCAyLjg1LjcwNSAzLjcyIDEuOCIvPjwvc3ZnPgo=&logoColor=white)
 ![Lightning Web Components](https://img.shields.io/badge/LWC-00A1E0?style=for-the-badge&logo=lightning&logoColor=white)
-![SOQL](https://img.shields.io/badge/SOQL-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)
+![SOQL](https://img.shields.io/badge/SOQL-00A1E0?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+U2FsZXNmb3JjZTwvdGl0bGU+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZD0iTTEwLjAwNiA1LjQxNWE0LjE5NSA0LjE5NSAwIDAxMy4wNDUtMS4zMDZjMS41NiAwIDIuOTU0LjkgMy42OSAyLjIwNS42My0uMyAxLjM1LS40NSAyLjEtLjQ1IDIuODUgMCA1LjE1OSAyLjM0IDUuMTU5IDUuMjJzLTIuMzEgNS4yMi01LjE3NiA1LjIyYy0uMzQ1IDAtLjY5LS4wNDQtMS4wMi0uMTA0YTMuNzUgMy43NSAwIDAxLTMuMyAxLjk1Yy0uNiAwLTEuMTU1LS4xNS0xLjY1LS4zNzVBNC4zMTQgNC4zMTQgMCAwMTguODggMjAuNGE0LjMwMiA0LjMwMiAwIDAxLTQuMDUtMi44MmMtLjI3LjA2Mi0uNTQuMDc2LS44MjUuMDc2LTIuMjA0IDAtNC4wMDUtMS44LTQuMDA1LTQuMDUgMC0xLjUuODExLTIuODA1IDIuMDEtMy41MS0uMjU1LS41Ny0uMzktMS4yLS4zOS0xLjg0NiAwLTIuNTggMi4xLTQuNjUgNC42NS00LjY1IDEuNTMgMCAyLjg1LjcwNSAzLjcyIDEuOCIvPjwvc3ZnPgo=&logoColor=white)
 
 #### 💻 Linguagens
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
@@ -97,22 +97,42 @@ foco:      "Transformar processos complexos em automações elegantes"
 <!-- ============================= PROJETOS EM DESTAQUE ============================= -->
 ## 🚀 Projetos em destaque
 
-<div align="center">
-
-<a href="https://github.com/brunotrolo/MCP_WhatsApp">
-  <img src="https://github-readme-stats.vercel.app/api/pin/?username=brunotrolo&repo=MCP_WhatsApp&theme=tokyonight&hide_border=true&bg_color=1a1b27" alt="Projeto MCP_WhatsApp — servidor MCP para integração de IA com WhatsApp" />
-</a>
-<a href="https://github.com/brunotrolo/MCP_OplabAPI">
-  <img src="https://github-readme-stats.vercel.app/api/pin/?username=brunotrolo&repo=MCP_OplabAPI&theme=tokyonight&hide_border=true&bg_color=1a1b27" alt="Projeto MCP_OplabAPI — servidor MCP para dados de opções da B3" />
-</a>
-<a href="https://github.com/brunotrolo/Salesforce_LWC-Developer">
-  <img src="https://github-readme-stats.vercel.app/api/pin/?username=brunotrolo&repo=Salesforce_LWC-Developer&theme=tokyonight&hide_border=true&bg_color=1a1b27" alt="Projeto Salesforce_LWC-Developer — componentes Lightning Web Components" />
-</a>
-<a href="https://github.com/brunotrolo/APP_GAS_StockOps">
-  <img src="https://github-readme-stats.vercel.app/api/pin/?username=brunotrolo&repo=APP_GAS_StockOps&theme=tokyonight&hide_border=true&bg_color=1a1b27" alt="Projeto APP_GAS_StockOps — automação de operações com Google Apps Script" />
-</a>
-
-</div>
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>🤖 <a href="https://github.com/brunotrolo/MCP_WhatsApp">MCP_WhatsApp</a></h3>
+      Servidor <b>MCP</b> que conecta modelos de IA ao <b>WhatsApp</b> — ler, enviar e responder mensagens via linguagem natural.
+      <br/><br/>
+      <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
+      <img src="https://img.shields.io/badge/MCP-000000?style=flat-square&logo=modelcontextprotocol&logoColor=white" alt="Model Context Protocol" />
+      <img src="https://img.shields.io/badge/WhatsApp-25D366?style=flat-square&logo=whatsapp&logoColor=white" alt="WhatsApp" />
+    </td>
+    <td width="50%" valign="top">
+      <h3>📈 <a href="https://github.com/brunotrolo/MCP_OplabAPI">MCP_OplabAPI</a></h3>
+      Servidor <b>MCP</b> para dados de <b>opções da B3</b> via API da Oplab — cotações e análises direto no seu assistente de IA.
+      <br/><br/>
+      <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
+      <img src="https://img.shields.io/badge/MCP-000000?style=flat-square&logo=modelcontextprotocol&logoColor=white" alt="Model Context Protocol" />
+      <img src="https://img.shields.io/badge/Fintech-8B5CF6?style=flat-square" alt="Fintech" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3>⚡ <a href="https://github.com/brunotrolo/Salesforce_LWC-Developer">Salesforce_LWC-Developer</a></h3>
+      Componentes <b>Lightning Web Components</b> e boas práticas de desenvolvimento na plataforma Salesforce.
+      <br/><br/>
+      <img src="https://img.shields.io/badge/LWC-00A1E0?style=flat-square&logo=lightning&logoColor=white" alt="Lightning Web Components" />
+      <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript" />
+    </td>
+    <td width="50%" valign="top">
+      <h3>🗂️ <a href="https://github.com/brunotrolo/APP_GAS_StockOps">APP_GAS_StockOps</a></h3>
+      Automação de operações e controle com <b>Google Apps Script</b> integrado ao Google Sheets.
+      <br/><br/>
+      <img src="https://img.shields.io/badge/Apps%20Script-4285F4?style=flat-square&logo=google&logoColor=white" alt="Google Apps Script" />
+      <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript" />
+    </td>
+  </tr>
+</table>
 
 <br/>
 
@@ -121,20 +141,11 @@ foco:      "Transformar processos complexos em automações elegantes"
 
 <div align="center">
 
-<img height="165" src="https://github-readme-stats.vercel.app/api?username=brunotrolo&show_icons=true&count_private=true&include_all_commits=true&theme=tokyonight&hide_border=true&bg_color=1a1b27&title_color=8B5CF6&icon_color=8B5CF6" alt="Estatísticas do GitHub de Bruno Teixeira" />
-<img height="165" src="https://github-readme-stats.vercel.app/api/top-langs/?username=brunotrolo&layout=compact&langs_count=8&theme=tokyonight&hide_border=true&bg_color=1a1b27&title_color=8B5CF6" alt="Linguagens mais usadas por Bruno Teixeira" />
-
-<br/>
-
 <img src="https://streak-stats.demolab.com?user=brunotrolo&theme=tokyonight&hide_border=true&background=1a1b27&ring=8B5CF6&fire=8B5CF6&currStreakLabel=8B5CF6" alt="Sequência de contribuições de Bruno Teixeira no GitHub" />
 
 <br/>
 
 <img src="https://github-readme-activity-graph.vercel.app/graph?username=brunotrolo&theme=tokyo-night&hide_border=true&bg_color=1a1b27&color=8B5CF6&line=8B5CF6&point=ffffff&area=true" alt="Gráfico de atividade de contribuições de Bruno Teixeira" width="100%" />
-
-<br/>
-
-<img src="https://github-profile-trophy.vercel.app/?username=brunotrolo&theme=tokyonight&no-frame=true&no-bg=true&column=7&margin-w=6&margin-h=6" alt="Troféus do perfil GitHub de Bruno Teixeira" />
 
 </div>
 
@@ -175,11 +186,6 @@ foco:      "Transformar processos complexos em automações elegantes"
 <br/>
 
 <div align="center">
-
-<!-- Citação dinâmica de dev: muda a cada visita ✨ -->
-<img src="https://quotes-github-readme.vercel.app/api?type=horizontal&theme=tokyonight&border=true" alt="Citação inspiradora do dia para desenvolvedores" />
-
-<br/><br/>
 
 > _"A melhor forma de prever o futuro é automatizá-lo."_ ⚡
 
