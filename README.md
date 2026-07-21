@@ -182,6 +182,11 @@ foco:      "Transformar processos complexos em automações elegantes"
 
 <div align="center">
 
+<!-- Citação dinâmica de dev: muda a cada visita ✨ -->
+<img src="https://quotes-github-readme.vercel.app/api?type=horizontal&theme=tokyonight&border=true" alt="Citação inspiradora do dia para desenvolvedores" />
+
+<br/><br/>
+
 > _"A melhor forma de prever o futuro é automatizá-lo."_ ⚡
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=120&section=footer" alt="" width="100%" />
