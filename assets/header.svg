@@ -39,13 +39,7 @@
 
   <!-- Texto -->
   <g text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
-    <text x="600" y="104" fill="url(#title)" font-size="56" font-weight="800" letter-spacing="1">
-      Bruno Teixeira
-      <animate attributeName="opacity" from="0" to="1" dur="1.2s" fill="freeze"/>
-    </text>
-    <text x="600" y="146" fill="#C7D2FE" font-size="19" font-weight="500" letter-spacing="2">
-      Salesforce Architect &#160;&#8226;&#160; AI &amp; MCP Builder &#160;&#8226;&#160; Automation Engineer
-      <animate attributeName="opacity" from="0" to="1" begin="0.4s" dur="1.4s" fill="freeze"/>
-    </text>
+    <text x="600" y="104" fill="#FFFFFF" font-size="56" font-weight="800" letter-spacing="1">Bruno Teixeira</text>
+    <text x="600" y="146" fill="#C7D2FE" font-size="19" font-weight="500" letter-spacing="2">Salesforce Architect &#160;&#8226;&#160; AI &amp; MCP Builder &#160;&#8226;&#160; Automation Engineer</text>
   </g>
 </svg>
