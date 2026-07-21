@@ -1,0 +1,23 @@
+<svg width="1200" height="120" viewBox="0 0 1200 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Onda decorativa">
+  <defs>
+    <linearGradient id="fbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f0c29"/>
+      <stop offset="55%" stop-color="#302b63"/>
+      <stop offset="100%" stop-color="#24243e"/>
+    </linearGradient>
+    <linearGradient id="fwave" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="50%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#6366F1"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="120" fill="url(#fbg)"/>
+  <g>
+    <path fill="url(#fwave)" opacity="0.65" d="M -240 34 q 60 22 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 V 0 H -240 Z">
+      <animateTransform attributeName="transform" type="translate" values="0 0; -240 0" dur="6s" repeatCount="indefinite"/>
+    </path>
+    <path fill="url(#fwave)" opacity="0.40" d="M -240 22 q 60 20 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 t 120 0 V 0 H -240 Z">
+      <animateTransform attributeName="transform" type="translate" values="0 0; -240 0" dur="9s" repeatCount="indefinite"/>
+    </path>
+  </g>
+</svg>

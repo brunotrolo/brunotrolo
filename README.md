@@ -13,7 +13,7 @@
 <div align="center">
 
 <img
-  src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=220&section=header&text=Bruno%20Teixeira&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=36&desc=Salesforce%20Architect%20%7C%20AI%20%26%20MCP%20Builder%20%7C%20Automation%20Engineer&descAlignY=56&descSize=18"
+  src="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header.svg"
   alt="Bruno Teixeira — Salesforce Architect, AI & MCP Builder, Automation Engineer"
   width="100%"
 />
@@ -189,7 +189,7 @@ foco:      "Transformar processos complexos em automações elegantes"
 
 > _"A melhor forma de prever o futuro é automatizá-lo."_ ⚡
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,20,24&height=120&section=footer" alt="" width="100%" />
+<img src="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/footer.svg" alt="" width="100%" />
 
 <sub>⭐ Se algo por aqui te ajudou ou te inspirou, deixa uma estrela nos projetos — é o que move um builder! ⭐</sub>
 
