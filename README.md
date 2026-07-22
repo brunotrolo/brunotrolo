@@ -173,8 +173,7 @@ foco:      "Transformar processos complexos em automações elegantes"
 <a href="https://twitter.com/brunotrolo">
   <img src="https://img.shields.io/badge/X%20(Twitter)-000000?style=for-the-badge&logo=x&logoColor=white" alt="X (Twitter) de Bruno Teixeira" />
 </a>
-<!-- Ajuste a URL do LinkedIn abaixo para o seu perfil real -->
-<a href="https://www.linkedin.com/in/brunotrolo/">
+<a href="https://www.linkedin.com/in/bruno-teixeira-rolo/">
   <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn de Bruno Teixeira" />
 </a>
 <a href="mailto:brunotrolo@gmail.com">
