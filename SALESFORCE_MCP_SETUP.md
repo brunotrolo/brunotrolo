@@ -142,6 +142,22 @@ claude mcp login salesforce-sobject-reads
 
 ---
 
+## 6. Remover servidores MCP
+
+Para remover um servidor (por exemplo, para reconfigurar com novas credenciais):
+
+```bash
+claude mcp remove salesforce-sobject-all
+```
+
+```bash
+claude mcp remove salesforce-sobject-reads
+```
+
+Após remover, repita os passos 2 e 3 para adicionar e autenticar novamente.
+
+---
+
 ## Problemas comuns
 
 - **"invalid client credentials"**: geralmente é porque o `oauth`/`clientId` foi editado manualmente no `.claude.json` em vez de usado via `--client-id` no comando `claude mcp add`.
