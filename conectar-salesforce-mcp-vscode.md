@@ -74,8 +74,32 @@ Consulte via Salesforce MCP as informações do usuário logado
 
 Se retornar seu nome, org e perfil, está tudo funcionando.
 
+## 5. Variante somente leitura (`sobject-reads`)
+
+Existe uma versão mais restrita do MCP, apenas leitura, mais segura para uso do dia a dia:
+
+```
+https://api.salesforce.com/platform/mcp/v1/platform/sobject-reads
+```
+
+Pode usar o **mesmo External Client App** (mesmo Consumer Key) criado no passo 1, já que ele tem o scope `mcp_api`, que cobre esse endpoint também. Basta repetir os passos 2 e 3 trocando o nome e a URL:
+
+```bash
+claude mcp add --transport http salesforce-sobject-reads \
+  https://api.salesforce.com/platform/mcp/v1/platform/sobject-reads \
+  --client-id SEU_CONSUMER_KEY_AQUI \
+  --callback-port 38000
+```
+
+```bash
+claude mcp login salesforce-sobject-reads
+```
+
+> **Importante sobre a porta:** use sempre a mesma porta configurada no Callback URL do App (`38000`, no exemplo do passo 1). Se usar uma porta diferente da registrada, o navegador retorna `ERR_CONNECTION_REFUSED` ao tentar redirecionar depois do login.
+
 ## Problemas comuns
 
 - **"invalid client credentials"**: geralmente é porque o `oauth`/`clientId` foi editado manualmente no `.claude.json` em vez de usado via `--client-id` no comando `claude mcp add`.
 - **"does not support dynamic client registration"**: o Salesforce não suporta o fluxo automático de client registration — é obrigatório criar o External Client App manualmente e passar o `--client-id`.
+- **`ERR_CONNECTION_REFUSED` no navegador ao autenticar**: a porta passada em `--callback-port` não bate com o Callback URL registrado no App. Use a mesma porta configurada no Salesforce.
 - App novo não aparece em "Connected Apps OAuth Usage": não é necessariamente um problema — External Client Apps (o tipo novo) nem sempre aparecem nessa tela legada.
