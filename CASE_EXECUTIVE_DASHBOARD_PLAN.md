@@ -151,15 +151,27 @@ Mesma verificação que o projeto irmão:
 - [ ] **Verificar Trusted IP Range** no Salesforce Setup (Setup → Security → Network Access)
 - [ ] **Verificar limite de rate limit** (padrão: 15 req/seg — uma SOQL a cada 10 min está bem abaixo)
 
-### 4. Teste exploratório de volume de Case
+### 4. Teste exploratório de volume e estrutura de Case
 
-Use o MCP Salesforce (Claude Code) para executar antes de Fase 1:
+Use MCP Salesforce (Claude Code) antes de Fase 1:
 
+**Validar volume:**
 ```sql
 SELECT COUNT() FROM Case WHERE CreatedDate = LAST_N_DAYS:30
 ```
 
-Se retornar um número **abaixo de 2.000**, paginação não é necessária na Fase 1. Se acima, será necessária na Fase 3 (Hardening).
+Deve retornar um número. Se **< 2.000**, paginação não é necessária na Fase 1. Se **> 2.000**, será implementada na Fase 3 (Hardening).
+
+**Validar campos:**
+```sql
+SELECT Id, CaseNumber, Status, Priority, Origin, RecordType.Name, 
+       Owner.Name, CreatedDate, ClosedDate, IsClosed 
+FROM Case 
+WHERE CreatedDate = LAST_N_DAYS:30
+LIMIT 5
+```
+
+Deve retornar registros com todos os campos populados. Se algum retornar NULL para maioria dos registros, pode haver customização missing (ex: RecordType, Owner, Priority).
 
 ---
 
@@ -197,6 +209,95 @@ document.querySelectorAll('.toggle').forEach(el =>
 ```
 
 Ambos os dashboards (monitoramento preditivo e Casos) podem conviver no **mesmo site do GitHub Pages**, em caminhos diferentes (`/monitoring/` e `/cases/`), já que cada um busca seus próprios JSONs de subpastas distintas do branch `data`.
+
+---
+
+## ESQUEMAS DE DADOS (JSON)
+
+### snapshot.json
+
+```json
+{
+  "timestamp": "2026-08-15T14:10:00Z",
+  "total_cases": 247,
+  "open_cases": 183,
+  "closed_cases": 64,
+  "metrics_by_status": {
+    "New": 42,
+    "In Progress": 89,
+    "On Hold": 15,
+    "Closed": 64,
+    "Escalated": 37
+  },
+  "metrics_by_priority": {
+    "Low": 85,
+    "Medium": 98,
+    "High": 52,
+    "Critical": 12
+  },
+  "metrics_by_owner": {
+    "John Smith": 28,
+    "Jane Doe": 35,
+    "Support Team Queue": 72,
+    "Unassigned": 112
+  },
+  "metrics_by_origin": {
+    "Email": 145,
+    "Phone": 62,
+    "Web": 40
+  },
+  "aging_open_cases": {
+    "0_to_1_day": 45,
+    "1_to_3_days": 62,
+    "3_to_7_days": 48,
+    "7_to_30_days": 22,
+    "over_30_days": 6
+  }
+}
+```
+
+### metrics_history.json
+
+```json
+{
+  "daily_metrics": [
+    {
+      "date": "2026-08-15",
+      "timestamp": "2026-08-15T14:10:00Z",
+      "total_cases": 247,
+      "open_cases": 183,
+      "closed_cases": 64,
+      "created_today": 12,
+      "closed_today": 8,
+      "avg_age_days": 5.2,
+      "critical_count": 12
+    },
+    {
+      "date": "2026-08-14",
+      "timestamp": "2026-08-14T14:10:00Z",
+      "total_cases": 243,
+      "open_cases": 179,
+      "closed_cases": 64,
+      "created_today": 9,
+      "closed_today": 5,
+      "avg_age_days": 5.1,
+      "critical_count": 11
+    }
+  ],
+  "summary": {
+    "period": "last_30_days",
+    "total_created": 312,
+    "total_closed": 268,
+    "trend_open_cases": "stable",
+    "backlog_increase_percent": 1.6
+  }
+}
+```
+
+**Granularidade:**
+- Um snapshot a cada 10 minutos (quando workflow roda)
+- Histórico mantém últimos 30 dias em `metrics_history.json`
+- Agregações pré-calculadas: Status, Priority, Owner, Origin, Aging
 
 ---
 

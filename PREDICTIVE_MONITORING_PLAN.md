@@ -97,15 +97,45 @@ monitoring/
 
 ---
 
+## DEFINIÇÃO DE "FALHA" E CAMPOS A MONITORAR
+
+O monitoramento detecta **anomalias de latência e taxa de erro** em chamadas de integração Salesforce (capturadas via Nebula Logger):
+
+**Critérios de alerta:**
+- **Latência anómala**: `ServiceDuration__c` (ms) > baseline histórico + N desvios (z-score)
+- **Taxa de erro elevada**: % de registros com `StatusCode__c` ∉ [200, 201, 204] > limiar
+- **Combinação**: ambas juntas = risco crítico
+
+**Campos de Nebula Logger a usar:**
+| Campo | Tipo | Uso |
+|-------|------|-----|
+| `Id` | String | Identificação única do log |
+| `Message__c` | String | Descrição da chamada (extrai método HTTP, endpoint) |
+| `ServiceDuration__c` | Integer (ms) | **Latência — base principal da heurística** |
+| `StatusCode__c` | Integer | **Status HTTP — detector de erro** |
+| `CreatedDate` | DateTime | Timestamp — agrupa por bucket |
+
+---
+
 ## SOQL DE COLETA (Nebula Logger)
 
 ```sql
 SELECT Id, Message__c, ServiceDuration__c, StatusCode__c, CreatedDate
 FROM Log__c
-WHERE CreatedDate = LAST_N_MINUTES:30
+WHERE CreatedDate = LAST_N_MINUTES:30 
+  AND (ServiceDuration__c != null OR StatusCode__c != null)
 ORDER BY CreatedDate DESC
 LIMIT 500
 ```
+
+**Explicação:**
+- **LAST_N_MINUTES:30**: coleta janela de 30 min (maior que cron de 5 min para ter contexto histórico)
+- **ServiceDuration__c != null OR StatusCode__c != null**: filtra apenas logs com dados úteis
+- **LIMIT 500**: padrão Salesforce (máximo retorna 2.000, Fase 5 implementa paginação)
+
+---
+
+## AUTENTICAÇÃO E CREDENCIAIS
 
 Autenticação: OAuth 2.0 `refresh_token` grant contra `https://login.salesforce.com/services/oauth2/token`, mesmas credenciais do Connected App já documentado em `SALESFORCE_MCP_SETUP.md`, agora armazenadas como **GitHub Secrets** (`SF_CLIENT_ID`, `SF_CLIENT_SECRET`, `SF_REFRESH_TOKEN`) em vez de Script Properties do Apps Script.
 
@@ -158,15 +188,25 @@ As credenciais já existem de um projeto anterior e estão documentadas em `SALE
   - Padrão: 15 requests/segundo por org
   - Monitoramento a cada 5 min + SOQL com até 500 registros está bem abaixo desse limite
 
-### 4. Teste rápido antes de Fase 0
+### 4. Teste exploratório de Nebula Logger
 
-Opcional, mas recomendado: use o MCP Salesforce do Claude Code para executar uma SOQL de teste:
+Antes de Fase 0, confirme que Nebula Logger está capturando dados com os campos necessários. Use MCP Salesforce (Claude Code):
 
 ```sql
-SELECT COUNT() FROM Log__c WHERE CreatedDate = LAST_N_MINUTES:30
+SELECT COUNT() FROM Log__c WHERE CreatedDate = LAST_N_MINUTES:120
 ```
 
-Se retornar um número, a conectividade está OK. Se falhar, investigue antes de passar para Fase 0.
+Deve retornar um número > 0. Se for 0 ou erro, Nebula Logger não está configurado — investigue antes.
+
+**Teste adicional** — validar campos de interesse:
+```sql
+SELECT Id, Message__c, ServiceDuration__c, StatusCode__c, CreatedDate 
+FROM Log__c 
+WHERE CreatedDate = LAST_N_MINUTES:120
+LIMIT 5
+```
+
+Deve retornar registros com `ServiceDuration__c` (latência em ms) e `StatusCode__c` (HTTP status) preenchidos. Se ambos forem NULL para todos os registros, a integração não está gravando dados estruturados — Nebula Logger precisa ser configurado corretamente na org.
 
 ---
 
@@ -248,6 +288,160 @@ function buildFeedbackLink(alertId) {
 ```
 
 O usuário clica, o GitHub abre a página nativa de criar Issue já preenchida, ele confirma com a própria conta do GitHub — sem exposição de token, sem servidor de escrita próprio.
+
+---
+
+## ESQUEMAS DE DADOS (JSON)
+
+### Time Buckets — Granularidade da Heurística
+
+A heurística agrupa logs em **buckets de 5 minutos por dia da semana**:
+- **Exemplo de bucket**: `"tue_14h-14h05"` = terça-feira, 14:00-14:05 UTC
+- **Finalidade**: capturar padrões horários (picos de tráfego, horários de menor volume)
+- **Total de buckets**: 7 dias × 288 buckets por dia = ~2.016 buckets
+
+Cada bucket armazena:
+- EWMA de `ServiceDuration__c` (latência média exponencial ponderada)
+- MAD (Median Absolute Deviation) da latência
+- Taxa de erro (% de status >= 400)
+- Threshold ajustável (z-score para alerta)
+
+### latest.json
+
+```json
+{
+  "timestamp": "2026-08-15T14:05:30Z",
+  "risk_score": 0.72,
+  "risk_level": "MEDIA",
+  "current_latency_ms": 245,
+  "error_rate_percent": 2.5,
+  "latest_bucket": "wed_14h-14h05",
+  "alerts": [
+    {
+      "type": "latency_anomaly",
+      "z_score": 2.3,
+      "description": "Latência 2.3σ acima do baseline"
+    }
+  ]
+}
+```
+
+### history.json
+
+```json
+{
+  "buckets": {
+    "mon_09h-09h05": {
+      "ewma_latency_ms": 180,
+      "mad_latency_ms": 25,
+      "error_rate_percent": 1.2,
+      "z_score_threshold": 2.5,
+      "sample_count": 145,
+      "last_updated": "2026-08-15T14:00:00Z"
+    },
+    "mon_09h05-09h10": { /* ... */ },
+    "tue_14h-14h05": {
+      "ewma_latency_ms": 245,
+      "mad_latency_ms": 60,
+      "error_rate_percent": 2.5,
+      "z_score_threshold": 2.5,
+      "sample_count": 132,
+      "last_updated": "2026-08-15T14:05:00Z"
+    }
+  },
+  "metadata": {
+    "total_buckets": 2016,
+    "data_period_days": 30,
+    "version": "1.0"
+  }
+}
+```
+
+### predictions.json (Fase 3+)
+
+```json
+[
+  {
+    "timestamp": "2026-09-01T14:05:00Z",
+    "bucket": "tue_14h-14h05",
+    "observation_count": 142,
+    "heuristic_score": 0.72,
+    "heuristic_alerted": true,
+    "shadow_prophet_score": 0.81,
+    "shadow_isolation_forest_anomaly": false,
+    "actual_incident": null,
+    "actual_incident_severity": null,
+    "actual_incident_confirmed_at": null,
+    "notes": "Verificado manualmente em 2026-09-02, falso positivo (pico de tráfego legítimo)"
+  },
+  {
+    "timestamp": "2026-09-01T14:10:00Z",
+    "bucket": "tue_14h05-14h10",
+    "observation_count": 138,
+    "heuristic_score": 0.41,
+    "heuristic_alerted": false,
+    "shadow_prophet_score": 0.38,
+    "shadow_isolation_forest_anomaly": false,
+    "actual_incident": false,
+    "actual_incident_confirmed_at": "2026-09-01T14:15:00Z",
+    "notes": ""
+  }
+]
+```
+
+**Como `actual_incident` é preenchido:**
+1. **Manual (Fase 0-2)**: usuário analisa histó rico e marca em feedback.json se foi falso positivo
+2. **Semi-automático (Fase 3+)**: script semanal (`weekly_retrain.py`) correlaciona alertas com tickets do Salesforce / status da integração para tentar automatizar confirmação
+3. **Never automatic**: decisão final é sempre humana (engenheiro de integração)
+
+### feedback.json
+
+```json
+[
+  {
+    "timestamp": "2026-09-02T10:30:00Z",
+    "alert_timestamp": "2026-09-01T14:05:00Z",
+    "bucket": "tue_14h-14h05",
+    "issue_number": 42,
+    "issue_url": "https://github.com/brunotrolo/brunotrolo/issues/42",
+    "feedback_type": "false_positive",
+    "confidence": "high",
+    "notes": "Pico de tráfego legítimo, não foi incidente real",
+    "adjustments_applied": {
+      "z_score_threshold_new": 2.8,
+      "z_score_threshold_old": 2.5
+    }
+  }
+]
+```
+
+### alerts.json
+
+```json
+{
+  "active_alerts": [
+    {
+      "id": "alert_20260801_001",
+      "timestamp": "2026-08-01T14:05:00Z",
+      "bucket": "tue_14h-14h05",
+      "risk_score": 0.85,
+      "severity": "ALTA",
+      "description": "Latência elevada na integração de Cases",
+      "status": "acknowledged",
+      "acknowledged_by": "eng_name",
+      "acknowledged_at": "2026-08-01T14:10:00Z"
+    }
+  ],
+  "recent_resolved": [
+    {
+      "id": "alert_20260731_001",
+      "timestamp": "2026-07-31T09:20:00Z",
+      "resolved_at": "2026-07-31T09:45:00Z",
+      "duration_minutes": 25
+    }
+  ]
+}
+```
 
 ---
 
