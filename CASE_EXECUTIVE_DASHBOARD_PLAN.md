@@ -25,15 +25,17 @@ A primeira versão deste plano usava Apps Script + Google Sheets. Ao decidir mig
 ```
 Salesforce (objeto Case)
     ↓ (GitHub Actions, cron a cada 10 min, runner com Python)
-    ├─ Autentica via OAuth refresh_token (credenciais em GitHub Secrets — mesmas do projeto irmão)
-    ├─ Consulta Case via REST API
-    └─ Gera JSON: snapshot atual + histórico para tendências
+    ├─ Autentica via OAuth 2.0 refresh_token grant (credenciais em GitHub Secrets)
+    │  └─ Credenciais: SF_CLIENT_ID, SF_CLIENT_SECRET, SF_REFRESH_TOKEN (compartilhadas com projeto irmão)
+    ├─ Consulta Case via Salesforce REST API (/services/data/v60.0/query)
+    │  └─ SOQL: SELECT Id, CaseNumber, Status, Priority, Origin, RecordType.Name, Owner.Name, CreatedDate, ClosedDate, IsClosed FROM Case WHERE CreatedDate = LAST_N_DAYS:30
+    └─ Agrega e gera JSON: snapshot atual + histórico para tendências
          ↓
-    Commit automático no branch `data`
+    Commit automático no branch `data` (mesmo padrão do projeto irmão)
          ↓
-GitHub Pages (site estático: HTML/CSS/JS, deploy raro)
+GitHub Pages (site estático: HTML/CSS/JS, deploy raro — só quando interface muda)
     ↓ (JS busca os JSONs direto do branch `data` via raw.githubusercontent.com)
-    ↓ (auto-refresh client-side a cada 10 min)
+    ↓ (auto-refresh client-side a cada 10 min, sem novo deploy)
 Dashboard com toggles (Agrupamento / Período / Escopo) + gráficos Google Charts
 ```
 
@@ -120,7 +122,44 @@ jobs:
           git push origin data
 ```
 
-**Credenciais:** reaproveita os mesmos GitHub Secrets (`SF_CLIENT_ID`, `SF_CLIENT_SECRET`, `SF_REFRESH_TOKEN`) já configurados para o projeto de monitoramento preditivo — mesmo Connected App do Salesforce, sem necessidade de nova configuração de autenticação.
+**Credenciais:** reaproveita os mesmos GitHub Secrets (`SF_CLIENT_ID`, `SF_CLIENT_SECRET`, `SF_REFRESH_TOKEN`) já configurados para o projeto de monitoramento preditivo — **sem necessidade de nova configuração de autenticação**.
+
+---
+
+## SETUP INICIAL (Pré-requisitos)
+
+**Antes de começar a Fase 1, confirme:**
+
+### 1. Requisitos técnicos obrigatórios
+- [ ] **Repositório `brunotrolo/brunotrolo` é público** (necessário para GitHub Actions com minutos ilimitados e GitHub Pages gratuito)
+- [ ] **GitHub Pages está habilitado** no repositório (Settings → Pages → Source: Deploy from a branch, branch `master`)
+- [ ] **Branch `data` existe** (ou será criado automaticamente pelo workflow na primeira execução)
+- [ ] **Python 3.11+** está disponível (confirmado no runner `ubuntu-latest` do GitHub Actions)
+
+### 2. Credenciais OAuth Salesforce
+
+**Reutilize as mesmas credenciais do projeto de monitoramento preditivo** — não é necessário criar um novo Connected App. As credenciais já devem estar em GitHub Secrets:
+- `SF_CLIENT_ID` ✓
+- `SF_CLIENT_SECRET` ✓
+- `SF_REFRESH_TOKEN` ✓
+
+Se ainda não existem (primeira execução), consulte a seção "SETUP INICIAL" em `PREDICTIVE_MONITORING_PLAN.md` para obter as credenciais.
+
+### 3. Validação de conectividade IP (Salesforce)
+
+Mesma verificação que o projeto irmão:
+- [ ] **Verificar Trusted IP Range** no Salesforce Setup (Setup → Security → Network Access)
+- [ ] **Verificar limite de rate limit** (padrão: 15 req/seg — uma SOQL a cada 10 min está bem abaixo)
+
+### 4. Teste exploratório de volume de Case
+
+Use o MCP Salesforce (Claude Code) para executar antes de Fase 1:
+
+```sql
+SELECT COUNT() FROM Case WHERE CreatedDate = LAST_N_DAYS:30
+```
+
+Se retornar um número **abaixo de 2.000**, paginação não é necessária na Fase 1. Se acima, será necessária na Fase 3 (Hardening).
 
 ---
 
@@ -158,6 +197,19 @@ document.querySelectorAll('.toggle').forEach(el =>
 ```
 
 Ambos os dashboards (monitoramento preditivo e Casos) podem conviver no **mesmo site do GitHub Pages**, em caminhos diferentes (`/monitoring/` e `/cases/`), já que cada um busca seus próprios JSONs de subpastas distintas do branch `data`.
+
+---
+
+## TROUBLESHOOTING COMUM
+
+| Erro | Solução |
+|-----|---------|
+| `403 Forbidden` ao chamar Salesforce REST API | Verificar IP Trusted Range (Setup → Security → Network Access) ou validar `refresh_token` manualmente |
+| `401 Unauthorized` ("invalid_grant") | Token refresh falhou — `refresh_token` expirou ou foi revogado; renovar via projeto irmão ou gerar novo |
+| `414 Request URI Too Long` | SOQL está muito complexa — simplificar a consulta ou usar paginação |
+| Workflow nunca executa | Confirmar que o workflow `.yml` está no branch `master` (cron só dispara do branch padrão) |
+| GitHub Pages mostra 404 | Verificar Settings → Pages → Source (deve ser "Deploy from a branch") e que `master` tem `case-dashboard/site/index.html` |
+| Dashboard mostra dados antigos | Verificar se `latest.json` no branch `data` tem timestamp recente; se estiver congelado, o workflow falhou |
 
 ---
 

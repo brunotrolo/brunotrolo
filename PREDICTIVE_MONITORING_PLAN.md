@@ -33,8 +33,10 @@ Prophet e Isolation Forest precisam de semanas de histórico pra ajustar bem (pr
 ```
 Salesforce (Nebula Logger)
     ↓ (GitHub Actions, cron a cada 5 min, runner com Python)
-    ├─ Autentica via OAuth refresh_token (credenciais em GitHub Secrets)
-    ├─ Consulta últimos 30 min de logs via REST API
+    ├─ Autentica via OAuth 2.0 refresh_token grant (credenciais em GitHub Secrets)
+    │  └─ Credenciais: SF_CLIENT_ID, SF_CLIENT_SECRET, SF_REFRESH_TOKEN
+    ├─ Consulta últimos 30 min de logs via Salesforce REST API (/services/data/v60.0/query)
+    │  └─ SOQL: SELECT Id, Message__c, ServiceDuration__c, StatusCode__c, CreatedDate FROM Log__c WHERE ...
     ├─ Heurística adaptativa (principal, dispara alerta) — Fase 1
     ├─ Prophet + Isolation Forest (modo sombra, só registra) — Fase 3+
     └─ Gera JSON: snapshot atual + histórico + alertas + registro comparativo
@@ -107,7 +109,64 @@ LIMIT 500
 
 Autenticação: OAuth 2.0 `refresh_token` grant contra `https://login.salesforce.com/services/oauth2/token`, mesmas credenciais do Connected App já documentado em `SALESFORCE_MCP_SETUP.md`, agora armazenadas como **GitHub Secrets** (`SF_CLIENT_ID`, `SF_CLIENT_SECRET`, `SF_REFRESH_TOKEN`) em vez de Script Properties do Apps Script.
 
-**Nota sobre "MCP":** como já esclarecido na versão anterior deste plano, o MCP Salesforce é feito para ser consumido por agentes de IA (Claude), não por scripts. O workflow do GitHub Actions replica o mesmo fluxo OAuth + REST que o MCP usa por baixo dos panos, em Python puro (`requests`), sem a camada MCP.
+**Nota sobre "MCP Salesforce":** O MCP (Model Context Protocol) Salesforce é uma ferramenta para agentes de IA (Claude Code). Na **Fase 0 de validação**, ele pode ser usado para testar conectividade e executar SOQL exploratórios. Porém, para os **workflows de produção** (GitHub Actions rodando em cron 24/7), usamos OAuth direto em Python (`requests`), que é:
+- **Headless** (sem navegador)
+- **Mais rápido** (sem camada de serialização do MCP)
+- **Mais previsível** (sem retry/timeout automático do MCP)
+
+O fluxo de setup de credenciais é o mesmo em ambos os casos: OAuth 2.0 `refresh_token` grant contra `https://login.salesforce.com/services/oauth2/token`.
+
+---
+
+## SETUP INICIAL (Pré-requisitos)
+
+**Antes de começar a Fase 0, confirme:**
+
+### 1. Requisitos técnicos obrigatórios
+- [ ] **Repositório `brunotrolo/brunotrolo` é público** (necessário para GitHub Actions com minutos ilimitados e GitHub Pages gratuito)
+- [ ] **GitHub Pages está habilitado** no repositório (Settings → Pages → Source: Deploy from a branch, branch `master`)
+- [ ] **Branch `data` existe** (ou será criado automaticamente pelo workflow na primeira execução)
+- [ ] **Python 3.11+** está disponível (confirmado no runner `ubuntu-latest` do GitHub Actions)
+
+### 2. Credenciais OAuth Salesforce
+
+As credenciais já existem de um projeto anterior e estão documentadas em `SALESFORCE_MCP_SETUP.md`. **Você precisa:**
+
+1. **Verificar se o Connected App ainda está ativo** no Salesforce:
+   - Setup → Apps → App Manager → procurar pela aplicação
+   - Verificar `Client ID` e `Client Secret`
+   
+2. **Obter ou renovar o `refresh_token`**:
+   - Se nunca foi obtido: use `SALESFORCE_MCP_SETUP.md` como guia para fazer um OAuth 2.0 Authorization Code flow manualmente
+   - Se já existe: validar que ainda é válido tentando fazer um token refresh (teste com `curl` antes de commitar nos Secrets)
+   
+3. **Adicionar os 3 Secrets no GitHub**:
+   - Ir para Settings → Secrets and variables → Actions
+   - Criar 3 secrets:
+     - `SF_CLIENT_ID` = value do Connected App
+     - `SF_CLIENT_SECRET` = value do Connected App (nunca expor em código)
+     - `SF_REFRESH_TOKEN` = token obtido no passo 2 (nunca expor em código)
+
+### 3. Validação de conectividade IP (Salesforce)
+
+- [ ] **Verificar Trusted IP Range** no Salesforce Setup:
+  - Setup → Security → Network Access
+  - Os runners do GitHub Actions usam IPs dinâmicos/compartilhados — alguns podem estar bloqueados por IP Trusted Range restritivo
+  - **Solução**: ou relaxar a restrição, ou adicionar os ranges publicados pelo GitHub: https://api.github.com/meta (chave `actions`)
+  
+- [ ] **Verificar limite de rate limit** da API REST do Salesforce:
+  - Padrão: 15 requests/segundo por org
+  - Monitoramento a cada 5 min + SOQL com até 500 registros está bem abaixo desse limite
+
+### 4. Teste rápido antes de Fase 0
+
+Opcional, mas recomendado: use o MCP Salesforce do Claude Code para executar uma SOQL de teste:
+
+```sql
+SELECT COUNT() FROM Log__c WHERE CreatedDate = LAST_N_MINUTES:30
+```
+
+Se retornar um número, a conectividade está OK. Se falhar, investigue antes de passar para Fase 0.
 
 ---
 
@@ -252,6 +311,16 @@ Com essa arquitetura, o número de elos externos cai de 2 (Salesforce + Colab) p
 | Cron do GitHub Actions atrasa em picos de carga (documentado pelo próprio GitHub) | Tratar 5 min como alvo, não garantia rígida; monitorar horário real das execuções no histórico de Actions |
 | Repositório precisa ser público para Pages gratuito + Actions com minutos ilimitados | Confirmar visibilidade do repositório antes de iniciar |
 | `refresh_token` expira ou é revogado | Documentar processo de renovação manual no runbook |
+
+**Troubleshooting Fase 0:**
+
+| Erro | Solução |
+|-----|---------|
+| `403 Forbidden` ao chamar Salesforce REST API | Verificar IP Trusted Range (veja seção de Setup acima) ou validar `refresh_token` manualmente com `curl` |
+| `401 Unauthorized` ("invalid_grant") | Token refresh falhou — `refresh_token` expirou ou foi revogado; obter novo token via OAuth flow |
+| `413 Payload Too Large` | SOQL retornou mais de 2.000 registros — implementar paginação via `nextRecordsUrl` (Fase 5) |
+| Workflow falha mas o job está como "passed" no GitHub | Verificar output do job (Actions → workflow → job) para stderr/exception real |
+| GitHub Pages não está servindo o site | Verificar Settings → Pages → Source (deve ser "Deploy from a branch") e que o branch `master` tem arquivo `monitoring/site/index.html` |
 
 ---
 
