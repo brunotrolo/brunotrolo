@@ -20,7 +20,11 @@ A nova arquitetura resolve isso movendo tudo para o GitHub:
 - **GitHub Pages** substitui o Web App do Apps Script como front-end
 - **GitHub Issues** substitui a necessidade de um backend de escrita — é o único ponto onde um humano precisa "gravar" algo (feedback de falso positivo), e isso é resolvido com um link pré-preenchido para abrir uma Issue, sem token exposto e sem servidor próprio
 
-**Resultado:** zero dependência de navegador aberto, zero infraestrutura fora do GitHub e do Salesforce, e o modelo de ML roda com a mesma qualidade de antes (Prophet + Isolation Forest reais, não uma versão simplificada).
+**Resultado:** zero dependência de navegador aberto, zero infraestrutura fora do GitHub e do Salesforce.
+
+### Decisão adicional: heurística adaptativa primeiro, ML em modo sombra depois
+
+Prophet e Isolation Forest precisam de semanas de histórico pra ajustar bem (problema de "cold start") — nas primeiras semanas deste projeto, sem esse histórico, eles podem performar pior que uma heurística simples bem calibrada. Por isso a Fase 1 usa uma **heurística adaptativa** (média móvel por padrão de horário + desvio, sem dependências de ML) como modelo principal, e Prophet/Isolation Forest entram só na Fase 3, rodando em **modo sombra** (registrando previsões, sem disparar alerta sozinhos) até haver dado real suficiente para provar, por comparação direta, se valem a complexidade extra.
 
 ---
 
@@ -31,8 +35,9 @@ Salesforce (Nebula Logger)
     ↓ (GitHub Actions, cron a cada 5 min, runner com Python)
     ├─ Autentica via OAuth refresh_token (credenciais em GitHub Secrets)
     ├─ Consulta últimos 30 min de logs via REST API
-    ├─ Roda Prophet (previsão) + Isolation Forest (anomalias) — no mesmo job, sem hop externo
-    └─ Gera JSON: snapshot atual + histórico + alertas
+    ├─ Heurística adaptativa (principal, dispara alerta) — Fase 1
+    ├─ Prophet + Isolation Forest (modo sombra, só registra) — Fase 3+
+    └─ Gera JSON: snapshot atual + histórico + alertas + registro comparativo
          ↓
     Commit automático no branch `data` (isolado do branch de código)
          ↓
@@ -43,7 +48,7 @@ Dashboard: risco atual, previsão, histórico, botão de feedback
     ↓ (clique em "Marcar como Falso Positivo")
 GitHub Issues (link pré-preenchido, usuário já logado no GitHub confirma o envio)
     ↓ (Action disparada por `issues: opened` com label `feedback`)
-Atualiza feedback.json → usado no retreino semanal
+Atualiza feedback.json → ajusta threshold da heurística e retreina o modelo sombra
 ```
 
 ### Por que separar branch de código (`master`) e branch de dados (`data`)
@@ -63,24 +68,28 @@ O site publicado no GitHub Pages (HTML/CSS/JS) quase não muda — só quando al
 ```
 monitoring/
 ├── scripts/
-│   ├── collect_and_predict.py    (autentica, consulta Nebula Logger, roda Prophet + Isolation Forest, gera JSON)
+│   ├── collect_and_predict.py    (autentica, consulta Nebula Logger, roda a heurística — Fase 1)
+│   ├── heuristic.py              (EWMA por bucket de horário + z-score/MAD + threshold ajustável)
+│   ├── shadow_ml.py              (Prophet + Isolation Forest em modo sombra — só a partir da Fase 3)
+│   ├── compare_models.py         (calcula precisão recente de cada abordagem no registro comparativo)
 │   ├── process_feedback.py       (lê o corpo de uma Issue de feedback, atualiza feedback.json)
-│   ├── weekly_retrain.py         (recalibra o modelo usando feedback.json + histórico)
-│   └── requirements.txt          (prophet, scikit-learn, pandas, requests)
+│   ├── weekly_retrain.py         (ajusta thresholds da heurística e retreina o modelo sombra — Fase 4)
+│   └── requirements.txt          (Fase 1: pandas, requests — sem prophet/scikit-learn ainda)
 ├── site/                          (fonte do GitHub Pages)
 │   ├── index.html
 │   ├── styles.css
 │   └── app.js                     (fetch dos JSONs, auto-refresh, gráficos, botão de feedback)
 └── data/                          (só existe no branch `data`, não em `master`)
-    ├── latest.json                (snapshot atual: risk_score, previsão, timestamp)
+    ├── latest.json                (snapshot atual: risk_score da heurística, timestamp)
     ├── history.json               (janela de 30 dias, usada nos gráficos de tendência)
     ├── alerts.json                (lista de alertas/problemas detectados)
-    └── feedback.json              (registros de falso positivo, usados no retreino)
+    ├── predictions.json           (registro comparativo: heurística vs. modelo sombra vs. resultado real — Fase 3+)
+    └── feedback.json              (registros de falso positivo, usados no ajuste/retreino)
 
 .github/workflows/
-├── monitoring-collect.yml         (cron */5 * * * *, coleta + predição + commit no branch data)
+├── monitoring-collect.yml         (cron */5 * * * *, coleta + heurística [+ sombra na Fase 3+] + commit no branch data)
 ├── monitoring-feedback.yml        (on: issues opened com label 'feedback', processa e commita)
-├── monitoring-retrain.yml         (cron semanal, retreina os modelos)
+├── monitoring-retrain.yml         (cron semanal, ajusta thresholds e retreina o modelo sombra — Fase 4+)
 └── monitoring-tests.yml           (roda pytest a cada push/PR em monitoring/**)
 ```
 
@@ -246,8 +255,24 @@ Com essa arquitetura, o número de elos externos cai de 2 (Salesforce + Colab) p
 
 ---
 
-### Fase 1 — MVP Real
-- `collect_and_predict.py` funcional: coleta real do Nebula Logger, Prophet + Isolation Forest reais (não mocks)
+### Fase 1 — MVP com Heurística Adaptativa
+
+Sem dependências de ML nesta fase — `requirements.txt` só precisa de `pandas` e `requests`.
+
+**Como a heurística funciona (`heuristic.py`):**
+```
+1. Baseline por janela de tempo: EWMA (média móvel exponencial) por combinação
+   dia-da-semana + faixa de horário (ex: "terça 14h-14h05 costuma ter ~200ms")
+2. Desvio robusto: EWMA do desvio absoluto (MAD) em vez de desvio-padrão puro,
+   pra não ser distorcido por outliers isolados
+3. Anomalia: z-score = (valor_atual - EWMA_bucket) / MAD_bucket
+   risk_score = função do z-score + comparação EWMA curta vs. EWMA longa (detecta
+   tendência sustentada sem precisar de changepoint detection completo)
+4. Threshold (quantos desvios disparam alerta) é ajustável por bucket, e é
+   justamente o que o feedback humano (Fase 4) recalibra ao longo do tempo
+```
+
+- `collect_and_predict.py` funcional: coleta real do Nebula Logger, roda a heurística, gera `latest.json`
 - `latest.json` e `history.json` populados a cada execução
 - Site no GitHub Pages exibindo risco atual e histórico
 
@@ -261,12 +286,33 @@ risk_score <= 0.40          → BAIXA (só loga)
 ```
 Canal de comunicação: sem Apps Script (que tinha `MailApp` nativo), o envio de email a partir do GitHub Actions usa uma Action pronta (ex.: `dawidd6/action-send-mail`) com SMTP configurado via Secrets, ou um webhook do Slack (`curl` simples para a URL do webhook) — ambos triviais de adicionar ao workflow de coleta quando `risk_score` ultrapassa o limiar.
 
-### Fase 3 — Feedback Contínuo e Indicador de Saúde
+### Fase 3 — Modo Sombra: Prophet/Isolation Forest + Registro Comparativo
+
+**Pré-requisito:** pelo menos algumas semanas de `history.json` real acumulado na Fase 1/2 — sem isso, Prophet ainda sofre do problema de cold-start descrito no início deste documento.
+
+- `shadow_ml.py`: roda Prophet + Isolation Forest no mesmo job de coleta, **sem disparar alerta** — só registra a própria previsão
+- `predictions.json` (registro único compartilhado): cada ciclo grava, lado a lado, o score da heurística, o score do modelo sombra, e (quando confirmado depois) o resultado real:
+```json
+{
+  "timestamp": "2026-09-01T14:05:00Z",
+  "service": "integration_xyz",
+  "heuristic_score": 0.72,
+  "heuristic_alerted": true,
+  "shadow_prophet_score": 0.81,
+  "shadow_isolation_forest_anomaly": true,
+  "actual_incident": null
+}
+```
+- `compare_models.py`: calcula, com base no `predictions.json`, a precisão recente de cada abordagem (heurística vs. modelo sombra) nos incidentes já confirmados — **estatística simples (precisão/recall por janela móvel), sem LLM envolvido** — e expõe esse comparativo no dashboard
+- **Promoção do modelo sombra a principal é uma decisão manual, documentada**, tomada quando o comparativo mostrar vantagem consistente do Prophet/Isolation Forest ao longo de várias semanas — nunca uma troca automática silenciosa
+- `requirements.txt` passa a incluir `prophet` e `scikit-learn` só a partir desta fase
+
+### Fase 4 — Feedback Contínuo
 - Loop de feedback via Issues já detalhado acima
-- `weekly_retrain.py` roda em cron semanal, lê `feedback.json` + `history.json`, recalibra `contamination` do Isolation Forest e re-treina o Prophet
+- `weekly_retrain.py` roda em cron semanal, lê `feedback.json` + `predictions.json`: ajusta o threshold por bucket da heurística e, se o modo sombra já estiver ativo, recalibra `contamination` do Isolation Forest e re-treina o Prophet
 - Indicador de saúde no dashboard: como não existe mais "Colab dormindo", o indicador passa a ser **"dados desatualizados"** — se o `timestamp` do `latest.json` estiver mais velho que o esperado (ex.: >15 min), o front-end mostra um banner de alerta. Isso cobre falhas reais (Salesforce fora do ar, rate limit, workflow falhando) sem o risco de sessão que o Colab tinha.
 
-### Fase 4 — Hardening
+### Fase 5 — Hardening
 - Paginação SOQL se o volume de logs ultrapassar 2.000 registros (`nextRecordsUrl`)
 - Retry com backoff exponencial nas chamadas ao Salesforce
 - Rotina de poda do branch `data` se o histórico de commits crescer demais (squash periódico, sem afetar `master`)
@@ -277,19 +323,22 @@ Canal de comunicação: sem Apps Script (que tinha `MailApp` nativo), o envio de
 
 ## DECISÕES TÉCNICAS CRÍTICAS (resumo)
 
-1. **GitHub Actions substitui Apps Script + Colab.** ML real (Prophet + Isolation Forest) roda no mesmo job que coleta os dados — elimina o segundo salto que existia com o Colab, e com ele o ngrok e a dependência de sessão/navegador aberto.
-2. **Branch `data` separado de `master`.** Evita poluir o histórico de código com commits de dados a cada 5 minutos.
-3. **GitHub Pages quase não faz redeploy.** O front-end busca dados direto via `raw.githubusercontent.com` do branch `data`, então o site (HTML/CSS/JS) só precisa ser republicado quando a interface muda, não quando os dados mudam.
-4. **GitHub Issues é o único mecanismo de escrita.** Usado exclusivamente para o feedback de falso positivo — sem precisar de nenhum backend customizado, usando a própria autenticação do GitHub.
-5. **"MCP" continua não sendo chamado diretamente** — o Python do GitHub Actions replica o fluxo OAuth + REST do Salesforce, mesma lógica documentada desde a v1 deste plano.
+1. **GitHub Actions substitui Apps Script + Colab.** A computação roda no mesmo job que coleta os dados — elimina o segundo salto que existia com o Colab, e com ele o ngrok e a dependência de sessão/navegador aberto.
+2. **Heurística adaptativa primeiro, Prophet/Isolation Forest em modo sombra depois.** Evita o problema de cold-start do ML (precisa de semanas de histórico pra ajustar bem) e adia a complexidade de dependências (`prophet`, `scikit-learn`) até haver dado real suficiente pra justificá-la. A troca de modelo principal é decisão manual baseada em comparação empírica, não automática.
+3. **Peso entre abordagens por desempenho histórico, não por LLM.** Comparar heurística vs. modelo sombra é um problema estatístico (precisão/recall por janela móvel) — resolvido com aritmética simples sobre o `predictions.json`, sem custo de API, sem latência extra, sem camada caixa-preta.
+4. **Branch `data` separado de `master`.** Evita poluir o histórico de código com commits de dados a cada 5 minutos.
+5. **GitHub Pages quase não faz redeploy.** O front-end busca dados direto via `raw.githubusercontent.com` do branch `data`, então o site (HTML/CSS/JS) só precisa ser republicado quando a interface muda, não quando os dados mudam.
+6. **GitHub Issues é o único mecanismo de escrita.** Usado exclusivamente para o feedback de falso positivo — sem precisar de nenhum backend customizado, usando a própria autenticação do GitHub.
+7. **"MCP" continua não sendo chamado diretamente** — o Python do GitHub Actions replica o fluxo OAuth + REST do Salesforce, mesma lógica documentada desde a v1 deste plano.
 
 ---
 
 ## CRITÉRIOS DE SUCESSO
 
 - Fase 0 conclui em poucos dias, com todos os itens do Definition of Done atendidos
-- Fase 1 gera previsões reais com o mesmo padrão de precisão inicial esperado (~70%, melhorando nas fases seguintes)
+- Fase 1: heurística adaptativa gerando alertas reais, sem dependência de ML, com precisão inicial estimada em ~70% (linha de base a ser medida com dado real, não suposta)
 - Fase 2 dispara alerta em menos de 1 minuto após detecção de severidade alta
-- Fase 3 mostra redução de falsos positivos semana a semana
-- **Custo total: $0/mês** — GitHub Actions e Pages são gratuitos para repositórios públicos, sem qualquer dependência de Colab, ngrok, Apps Script ou Google Sheets
+- Fase 3: modelo sombra (Prophet/Isolation Forest) acumulando histórico comparativo por pelo menos algumas semanas antes de qualquer decisão de promoção
+- Fase 4 mostra redução de falsos positivos semana a semana, e o comparativo heurística-vs-sombra é decidido com dado real
+- **Custo total: $0/mês** — GitHub Actions e Pages são gratuitos para repositórios públicos, sem qualquer dependência de Colab, ngrok, Apps Script, Google Sheets ou API de LLM
 - **Disponibilidade real 24/7** — sem depender de navegador aberto, ao contrário da v1 deste plano
