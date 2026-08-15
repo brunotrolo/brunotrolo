@@ -1,5 +1,5 @@
 # PLANO: DASHBOARD EXECUTIVO DE CASOS SALESFORCE
-## Arquitetura: Apps Script + Google Sheets + Web App (toggles + auto-refresh)
+## Arquitetura v2: 100% GitHub (Actions + Pages)
 
 **Status:** Plano Aprovado - Pronto para Implementação
 **Data:** 2026-08-15
@@ -8,17 +8,15 @@
 
 ---
 
-## CONTEXTO
+## CONTEXTO E MOTIVO DA MUDANÇA DE ARQUITETURA
 
-Reaproveitando a mesma arquitetura já validada no `PREDICTIVE_MONITORING_PLAN.md` (Apps Script + OAuth 2.0 direto no Salesforce + Google Sheets como camada de dados), o objetivo agora é um **dashboard executivo de Casos do Salesforce**, mais simples que o projeto de monitoramento preditivo (sem ML, sem Colab, sem alertas) — apenas visualização com:
+A primeira versão deste plano usava Apps Script + Google Sheets. Ao decidir migrar o projeto irmão (monitoramento preditivo) para GitHub Actions + Pages — eliminando a dependência de navegador aberto que o Colab exigia — faz sentido aplicar a mesma arquitetura aqui, por consistência e porque ela é estritamente mais simples para este caso: o dashboard de Casos é **só leitura** (nenhum feedback humano precisa ser gravado), então nem o mecanismo de GitHub Issues do projeto irmão é necessário aqui.
 
-- Atualização automática dos dados a cada 10 minutos (backend)
-- Refresh automático do front-end do Web App (o executivo não precisa recarregar a página)
-- Variações de visualização controladas por **toggles** no próprio dashboard (sem precisar de nova consulta ao Salesforce a cada clique)
+- **GitHub Actions** substitui o Apps Script como coletor — roda em `schedule` (cron a cada 10 min), 100% headless
+- **Arquivos JSON versionados no repositório** substituem o Google Sheets
+- **GitHub Pages** substitui o Web App do Apps Script como front-end, com os mesmos toggles e auto-refresh já especificados na v1
 
-Como não há dependência de Colab/ML externo, este projeto é **mais confiável** que o de monitoramento preditivo — elimina o maior risco daquele projeto (Colab "dormindo"). A única infraestrutura externa ao Google é o próprio Salesforce, cuja conectividade via Apps Script já está sendo validada na Fase 0 do projeto irmão.
-
-**Dependência:** Este projeto assume que a Fase 0 do `PREDICTIVE_MONITORING_PLAN.md` (conectividade Apps Script ↔ Salesforce via OAuth REST) foi validada com sucesso. Reaproveita o mesmo Connected App / padrão de credenciais em Script Properties — não precisa repetir a validação de conectividade do zero.
+**Resultado:** arquitetura ainda mais enxuta que a v1 — sem Apps Script, sem Sheets, sem navegador aberto, sem nenhum passo manual.
 
 ---
 
@@ -26,26 +24,26 @@ Como não há dependência de Colab/ML externo, este projeto é **mais confiáve
 
 ```
 Salesforce (objeto Case)
-    ↓ (Apps Script consulta via REST API, a cada 10 min — mesmo padrão OAuth já validado)
-Google Sheets (camada de dados: snapshot atual + histórico para tendências)
-    ↓
-Google Apps Script Web App (HTML Service)
-    ↓ (JS client-side: auto-refresh a cada 10 min via google.script.run)
-Dashboard renderizado com Google Charts + Toggles (troca de visão sem nova consulta)
+    ↓ (GitHub Actions, cron a cada 10 min, runner com Python)
+    ├─ Autentica via OAuth refresh_token (credenciais em GitHub Secrets — mesmas do projeto irmão)
+    ├─ Consulta Case via REST API
+    └─ Gera JSON: snapshot atual + histórico para tendências
+         ↓
+    Commit automático no branch `data`
+         ↓
+GitHub Pages (site estático: HTML/CSS/JS, deploy raro)
+    ↓ (JS busca os JSONs direto do branch `data` via raw.githubusercontent.com)
+    ↓ (auto-refresh client-side a cada 10 min)
+Dashboard com toggles (Agrupamento / Período / Escopo) + gráficos Google Charts
 ```
 
-**Por que Google Charts:** biblioteca nativa do Google, carregada do CDN do próprio Google — evita o risco de bloqueio de domínio externo por política do Workspace Admin (o mesmo risco que o ngrok tem no projeto de monitoramento preditivo).
-
-**Por que Sheets como camada intermediária (não consulta live a cada acesso):** permite manter histórico para gráficos de tendência (casos criados/fechados por dia, evolução do backlog) e evita múltiplas chamadas simultâneas ao Salesforce se vários executivos abrirem o dashboard ao mesmo tempo.
-
-**Toggles são client-side:** o Web App busca o dataset completo uma vez a cada ciclo de refresh (10 min) e os toggles apenas re-renderizam esse dataset já carregado (agrupando/filtrando em JavaScript), sem round-trip adicional ao Sheets ou Salesforce a cada clique.
+Mesma lógica de separação `master` (código) / `data` (dados) e mesmo motivo já detalhado no `PREDICTIVE_MONITORING_PLAN.md`: o cron só dispara para workflows definidos no branch padrão, e manter os dados num branch separado evita poluir o histórico de código com um commit a cada 10 minutos.
 
 ---
 
 ## DADOS E MÉTRICAS
 
-**Consulta Salesforce (autoria nova — não existe query de Case no repositório hoje):**
-
+**Consulta Salesforce (mesma da v1):**
 ```sql
 SELECT Id, CaseNumber, Status, Priority, Origin, RecordType.Name,
        Owner.Name, CreatedDate, ClosedDate, IsClosed
@@ -54,32 +52,14 @@ WHERE CreatedDate = LAST_N_DAYS:30
 ORDER BY CreatedDate DESC
 ```
 
-**Métricas executivas cobertas:**
-- Total de casos abertos / fechados
-- Distribuição por Status, Prioridade, Dono/Fila, Origem
-- Aging: casos abertos há mais de X dias (SLA)
-- Tendência: casos criados vs. fechados por dia (últimos 30 dias)
+**Métricas executivas:** total aberto/fechado, distribuição por Status/Prioridade/Dono/Origem, aging (casos abertos há mais de X dias), tendência de criados vs. fechados por dia.
 
-**Toggles da interface:**
+**Toggles (client-side, sem nova chamada ao backend a cada clique):**
 - **Agrupamento:** Por Status | Por Prioridade | Por Dono | Por Origem
 - **Período:** Hoje | Últimos 7 dias | Últimos 30 dias | Todos os casos abertos
 - **Escopo:** Todos | Somente Abertos | Somente Fechados
 
-**Risco de volume a observar:** SOQL sem paginação retorna até 2.000 registros. Se o volume de casos nos últimos 30 dias ultrapassar isso, será necessário paginar via `nextRecordsUrl`. Não implementar isso no MVP — validar volume real primeiro e tratar na Fase 3 se necessário.
-
----
-
-## ESTRUTURA DE DADOS (Google Sheets)
-
-Planilha: `SF-Case-Executive-Dashboard` (separada da planilha do projeto de monitoramento preditivo, para isolar responsabilidades — mesmo Connected App do Salesforce pode ser reaproveitado)
-
-**Aba `Config`:** mesma convenção do projeto irmão (chave/valor: `LAST_RUN`, etc.)
-
-**Aba `Cases_Snapshot`:** sobrescrita a cada execução (10 min) — CaseNumber, Status, Priority, OwnerName, Origin, RecordType, CreatedDate, ClosedDate, IsClosed, AgeDays
-
-**Aba `Metrics_History`:** append-only — Timestamp, TotalOpen, TotalCreatedToday, TotalClosedToday, AvgAgeDays (base para os gráficos de tendência)
-
-**Aba `Log`:** mesma convenção operacional do projeto irmão (Timestamp, Step, Status, DurationMs, Details) — visibilidade de falhas na coleta
+**Risco de volume:** SOQL sem paginação retorna até 2.000 registros — validar volume real de casos em 30 dias antes de decidir se paginação (`nextRecordsUrl`) é necessária.
 
 ---
 
@@ -87,66 +67,131 @@ Planilha: `SF-Case-Executive-Dashboard` (separada da planilha do projeto de moni
 
 ```
 case-dashboard/
-├── apps-script/
-│   ├── Code.gs                     (trigger 10min + doGet do Web App)
-│   ├── SalesforceCaseConnector.gs  (auth OAuth + SOQL de Case — reaproveita padrão do SalesforceConnector.gs irmão)
-│   ├── SheetWriter.gs              (grava snapshot + histórico)
-│   ├── DashboardService.gs         (função server-side chamada pelo front: retorna JSON agregado)
-│   ├── appsscript.json
-│   └── WebApp/
-│       ├── Index.html              (shell do dashboard)
-│       ├── Styles.html             (CSS, incluído via HtmlService templating)
-│       └── Script.html             (JS client-side: auto-refresh 10min, lógica dos toggles, Google Charts)
-└── tests/
-    ├── aggregation.test.js         (testa lógica pura de agrupamento/filtro, extraída do Script.html)
-    └── appsscript.test.js
+├── scripts/
+│   ├── collect_cases.py       (autentica, consulta Case, agrega, gera JSON)
+│   └── requirements.txt       (requests, pandas)
+├── site/                       (fonte do GitHub Pages)
+│   ├── index.html
+│   ├── styles.css
+│   └── app.js                  (fetch dos JSONs, toggles, Google Charts, auto-refresh)
+└── data/                        (só existe no branch `data`)
+    ├── snapshot.json             (estado atual dos casos)
+    └── metrics_history.json      (série histórica para os gráficos de tendência)
+
+.github/workflows/
+├── case-dashboard-collect.yml   (cron */10 * * * *, coleta + commit no branch data)
+└── case-dashboard-tests.yml     (roda pytest a cada push/PR em case-dashboard/**)
 ```
+
+---
+
+## EXEMPLO DE WORKFLOW
+
+```yaml
+name: Coleta de Casos - Dashboard Executivo
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install -r case-dashboard/scripts/requirements.txt
+      - run: python case-dashboard/scripts/collect_cases.py --output-dir /tmp/data-output
+        env:
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_CLIENT_SECRET: ${{ secrets.SF_CLIENT_SECRET }}
+          SF_REFRESH_TOKEN: ${{ secrets.SF_REFRESH_TOKEN }}
+      - name: Publica no branch data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin data
+          git checkout data
+          mkdir -p case-dashboard/data
+          cp -r /tmp/data-output/* case-dashboard/data/
+          git add case-dashboard/data/
+          git commit -m "Atualiza dados de casos $(date -u +%Y-%m-%dT%H:%M:%SZ)" || echo "Sem mudanças"
+          git push origin data
+```
+
+**Credenciais:** reaproveita os mesmos GitHub Secrets (`SF_CLIENT_ID`, `SF_CLIENT_SECRET`, `SF_REFRESH_TOKEN`) já configurados para o projeto de monitoramento preditivo — mesmo Connected App do Salesforce, sem necessidade de nova configuração de autenticação.
+
+---
+
+## FRONT-END (GitHub Pages)
+
+```javascript
+// case-dashboard/site/app.js
+const DATA_BASE = 'https://raw.githubusercontent.com/brunotrolo/brunotrolo/data/case-dashboard/data';
+let currentData = null;
+
+async function fetchSnapshot() {
+  const res = await fetch(`${DATA_BASE}/snapshot.json?t=${Date.now()}`);
+  return res.json();
+}
+
+function renderDashboard(data) {
+  currentData = data;
+  const groupBy = document.getElementById('groupByToggle').value;
+  const period = document.getElementById('periodToggle').value;
+  const scope = document.getElementById('scopeToggle').value;
+  const filtered = applyToggles(data.cases, groupBy, period, scope);
+  drawChart(filtered); // Google Charts
+}
+
+async function refresh() {
+  renderDashboard(await fetchSnapshot());
+}
+setInterval(refresh, 10 * 60 * 1000);
+refresh();
+
+// Toggles só re-renderizam o dataset já carregado, sem novo fetch
+document.querySelectorAll('.toggle').forEach(el =>
+  el.addEventListener('change', () => renderDashboard(currentData))
+);
+```
+
+Ambos os dashboards (monitoramento preditivo e Casos) podem conviver no **mesmo site do GitHub Pages**, em caminhos diferentes (`/monitoring/` e `/cases/`), já que cada um busca seus próprios JSONs de subpastas distintas do branch `data`.
 
 ---
 
 ## FASES
 
-### Fase 1 — MVP (coleta + armazenamento + Web App básico)
-- `SalesforceCaseConnector.gs`: autentica (mesmo fluxo `refresh_token` do projeto irmão) e executa a SOQL de Case
-- `SheetWriter.gs`: grava snapshot em `Cases_Snapshot` e acrescenta linha em `Metrics_History`
-- Trigger de 10 em 10 minutos (`ScriptApp.newTrigger(...).everyMinutes(10)`)
-- Web App simples (`doGet`) exibindo tabela com os dados do snapshot, sem toggles ainda
-- **Definition of Done:** Web App acessível via URL, mostrando dados reais de Case, atualizados a cada 10 min
+### Fase 1 — MVP (coleta + armazenamento + Web page básica)
+- `collect_cases.py` funcional, commit automático no branch `data`
+- Página estática simples no GitHub Pages exibindo tabela de casos, sem toggles ainda
+- **Definition of Done:** site publicado, mostrando dados reais de Case, atualizados a cada 10 min
 
 ### Fase 2 — Dashboard completo (toggles + gráficos + auto-refresh)
-- `DashboardService.gs`: função chamada pelo front (`google.script.run.getDashboardData()`) retorna JSON com snapshot + histórico
-- `Script.html`: implementa os 3 toggles (Agrupamento / Período / Escopo), renderiza com Google Charts (barras para distribuição, linha para tendência)
-- Auto-refresh client-side:
-```javascript
-function refreshDashboard() {
-  google.script.run.withSuccessHandler(renderDashboard).getDashboardData();
-}
-setInterval(refreshDashboard, 10 * 60 * 1000);
-refreshDashboard();
-```
-- **Definition of Done:** todos os toggles funcionam sem nova chamada ao backend; dashboard atualiza sozinho a cada 10 min sem reload manual da página
+- Implementa os 3 toggles e os gráficos (Google Charts: barras para distribuição, linha para tendência)
+- Auto-refresh a cada 10 min sem reload manual
+- **Definition of Done:** toggles funcionam instantaneamente (sem novo fetch), dashboard atualiza sozinho
 
-### Fase 3 — CI/CD + Hardening
-- `.github/workflows/case-dashboard-ci.yml`: testes unitários (lógica de agregação em `aggregation.test.js` via Jest) + deploy automático via `clasp push` — mesma convenção do `phase0-ci.yml` do projeto irmão
-- Tratamento de erro: se a coleta falhar, Web App exibe "última atualização" com timestamp e aviso de dado potencialmente desatualizado (mesma filosofia de transparência do health-check do projeto de monitoramento preditivo)
-- Paginação SOQL se o volume de casos exigir (ver risco de volume acima)
-- Controle de acesso do Web App: deploy com "Executar como: Eu (desenvolvedor)" + "Quem tem acesso: qualquer pessoa no domínio da empresa" (dashboard interno, não público)
+### Fase 3 — Hardening
+- `case-dashboard-tests.yml`: testes unitários (pytest para `collect_cases.py`, Jest para a lógica de agregação em `app.js`)
+- Paginação SOQL se necessário
+- Indicador de "dados desatualizados" se o `timestamp` do snapshot estiver mais velho que o esperado (mesma filosofia do projeto irmão)
 
 ---
 
 ## DECISÕES TÉCNICAS
 
-1. **Reaproveita o Connected App / padrão OAuth** já documentado em `SALESFORCE_MCP_SETUP.md` e usado no `PREDICTIVE_MONITORING_PLAN.md` — sem necessidade de nova configuração de autenticação.
-2. **Planilha separada** da do projeto de monitoramento preditivo, para isolar responsabilidades (Case dashboard vs. Nebula Logger). Mesmas credenciais Salesforce podem ser reutilizadas.
-3. **Sem Fase 0 própria de conectividade** — depende da Fase 0 do projeto irmão já ter validado que Apps Script consegue autenticar e chamar a REST API do Salesforce na estrutura da empresa.
-4. **Google Charts em vez de qualquer lib externa** — reduz risco de bloqueio por política de rede corporativa (mesma classe de risco do ngrok, evitada aqui).
-5. **Toggles são 100% client-side** — apenas 1 fetch de dados a cada 10 min, toggles só re-renderizam o dataset já carregado.
+1. **Mesma arquitetura do projeto irmão** (`PREDICTIVE_MONITORING_PLAN.md`), sem o mecanismo de Issues — este dashboard é só leitura, não precisa de feedback humano gravado.
+2. **Reaproveita os mesmos GitHub Secrets** de autenticação Salesforce.
+3. **Convive no mesmo site do GitHub Pages** que o projeto de monitoramento preditivo, em subcaminho próprio.
+4. **Google Charts** carregado via CDN do próprio Google — sem risco de bloqueio de domínio externo por política corporativa.
 
 ---
 
 ## CRITÉRIOS DE SUCESSO
 
-- Fase 1 conclui com dados reais de Case visíveis no Web App
-- Fase 2: os 3 toggles funcionam instantaneamente (sem lag perceptível) e o dashboard atualiza sozinho a cada 10 min
-- Fase 3: pipeline CI roda testes e faz deploy automático ao mesclar na branch de destino
-- Custo total: **$0/mês** (Apps Script, Sheets e Google Charts são gratuitos; sem dependência de Colab/ngrok)
+- Fase 1 conclui com dados reais de Case visíveis no site
+- Fase 2: os 3 toggles funcionam instantaneamente e o dashboard atualiza sozinho a cada 10 min
+- Fase 3: pipeline CI roda testes automaticamente
+- **Custo total: $0/mês** — GitHub Actions e Pages gratuitos, sem Apps Script, sem Sheets

@@ -1,446 +1,295 @@
 # PLANO: MONITORAMENTO PREDITIVO SALESFORCE (Nebula Logger + ML)
-## Arquitetura: Apps Script + Google Colab + Google Sheets
+## Arquitetura v2: 100% GitHub (Actions + Pages + Issues)
 
-**Status:** Plano Aprovado - Fase 0 em Implementação
+**Status:** Plano Aprovado - Pronto para Implementação
 **Data:** 2026-08-15
 **Repositório:** brunotrolo/brunotrolo
 **Role:** AI Solution Architect
 
 ---
 
-## CONTEXTO
+## CONTEXTO E MOTIVO DA MUDANÇA DE ARQUITETURA
 
-O objetivo é construir um sistema que monitora os logs de integração do Nebula Logger no Salesforce e prevê falhas de API com 5-10 minutos de antecedência, usando ML (Prophet + Isolation Forest), com aprendizado contínuo via feedback humano. Restrições da empresa: sem Google Cloud/AWS pagos nesta fase, sem licença Einstein, precisa rodar 24/7 (ou o mais próximo disso), e não pode depender de infraestrutura que a empresa não libera.
+A primeira versão deste plano usava Apps Script + Google Colab + Google Sheets. Na prática, essa arquitetura tinha um problema estrutural: o Colab (gratuito) só fica confiavelmente ativo com uma aba do navegador aberta — "background execution" sem aba aberta é recurso do Colab Pro (pago). Isso contradiz diretamente o requisito original: **rodar 24/7 sem depender de alguém manter um navegador aberto**.
 
-Depois de avaliar alternativas (Apex+LWC nativo, Cloud Functions, etc.), a arquitetura escolhida é 100% baseada em ferramentas Google gratuitas + Salesforce:
+A nova arquitetura resolve isso movendo tudo para o GitHub:
+
+- **GitHub Actions** substitui o Apps Script como orquestrador — roda em `schedule` (cron), 100% headless, sem navegador, sem sessão que expira
+- **Python real dentro do runner do GitHub Actions** substitui o Colab — Prophet e Isolation Forest rodam no mesmo job que coleta os dados, sem precisar de um segundo salto (nada de ngrok, nada de URL efêmera)
+- **Arquivos JSON versionados no repositório** substituem o Google Sheets como camada de dados
+- **GitHub Pages** substitui o Web App do Apps Script como front-end
+- **GitHub Issues** substitui a necessidade de um backend de escrita — é o único ponto onde um humano precisa "gravar" algo (feedback de falso positivo), e isso é resolvido com um link pré-preenchido para abrir uma Issue, sem token exposto e sem servidor próprio
+
+**Resultado:** zero dependência de navegador aberto, zero infraestrutura fora do GitHub e do Salesforce, e o modelo de ML roda com a mesma qualidade de antes (Prophet + Isolation Forest reais, não uma versão simplificada).
+
+---
+
+## ARQUITETURA
 
 ```
 Salesforce (Nebula Logger)
-    ↓ (consulta últimos 30 min, a cada 5 min)
-Google Apps Script (orquestrador, roda nos servidores do Google)
-    ↓ (envia dados para análise)
-Google Colab (Prophet + Isolation Forest — ML e detecção de anomalias)
-    ↓ (retorna score de risco + anomalias)
-Google Apps Script
-    ↓ (grava resultado)
-Google Sheets (histórico + aba de problemas)
-    ↓ (se severidade alta)
-Comunicação (Email/Slack/WhatsApp)
+    ↓ (GitHub Actions, cron a cada 5 min, runner com Python)
+    ├─ Autentica via OAuth refresh_token (credenciais em GitHub Secrets)
+    ├─ Consulta últimos 30 min de logs via REST API
+    ├─ Roda Prophet (previsão) + Isolation Forest (anomalias) — no mesmo job, sem hop externo
+    └─ Gera JSON: snapshot atual + histórico + alertas
+         ↓
+    Commit automático no branch `data` (isolado do branch de código)
+         ↓
+GitHub Pages (site estático: HTML/CSS/JS, deploy raro — só quando o site muda)
+    ↓ (JS do front-end busca os JSONs direto do branch `data` via raw.githubusercontent.com)
+    ↓ (auto-refresh client-side a cada 5 min, sem precisar redeploy do site)
+Dashboard: risco atual, previsão, histórico, botão de feedback
+    ↓ (clique em "Marcar como Falso Positivo")
+GitHub Issues (link pré-preenchido, usuário já logado no GitHub confirma o envio)
+    ↓ (Action disparada por `issues: opened` com label `feedback`)
+Atualiza feedback.json → usado no retreino semanal
 ```
 
-**Antes de construir isso tudo, existe um risco real e não-óbvio:** o Apps Script roda nos servidores do Google (não na máquina do usuário), e a Salesforce corporativa pode ter Trusted IP Ranges, restrições de Connected App, ou o Google Workspace da empresa pode bloquear chamadas externas (`UrlFetchApp`) saindo do Apps Script. Se qualquer uma dessas travas existir, o projeto inteiro trava — por isso a **Fase 0** existe: um teste de conectividade mínimo, sem lógica de negócio nenhuma, só para provar que a cadeia funciona na estrutura da empresa antes de investir tempo no MVP completo.
+### Por que separar branch de código (`master`) e branch de dados (`data`)
+
+O workflow escrito em `master` roda o script Python e o resultado é commitado num branch `data` dedicado. Isso evita poluir o histórico de commits do código com centenas de commits de dados por dia (a cada 5 min = ~288 commits/dia). O branch `data` cresce rápido, mas isso é esperado e não afeta PRs, releases ou histórico do código-fonte.
+
+**Detalhe técnico importante:** o GitHub só dispara o gatilho `schedule` (cron) para arquivos de workflow que estão no branch padrão (`master`). Por isso o `.yml` do workflow mora em `master`, mas o script, ao final da execução, troca para o branch `data` só para gravar o resultado.
+
+### Por que o front-end busca dados direto do branch `data` (sem redeploy do Pages)
+
+O site publicado no GitHub Pages (HTML/CSS/JS) quase não muda — só quando alteramos a interface. Os *dados*, sim, mudam a cada 5 minutos. Separando as duas coisas, o JavaScript do dashboard busca o JSON mais recente direto via `https://raw.githubusercontent.com/brunotrolo/brunotrolo/data/monitoring/latest.json`, sem precisar de um novo deploy do Pages a cada atualização. Isso é possível porque `brunotrolo/brunotrolo` é um repositório público — conteúdo raw é acessível publicamente sem autenticação.
 
 ---
 
-## VISÃO GERAL DAS FASES
+## ESTRUTURA DE ARQUIVOS
 
-| Fase | Objetivo | Duração Estimada |
-|------|----------|-------------------|
-| **Fase 0** | Validar conectividade (Apps Script → Salesforce, Apps Script → Colab, CI/CD) | 3-5 dias úteis |
-| Fase 1 | MVP funcional: dados reais do Nebula Logger + ML real (Prophet + Isolation Forest) | 2-3 semanas |
-| Fase 2 | Severidade + comunicação automática (alertas) | 1 semana |
-| Fase 3 | Aprendizado contínuo + resiliência (fallback se Colab não acordar) | 1-2 semanas |
-| Fase 4 | Hardening / produção | contínuo |
+```
+monitoring/
+├── scripts/
+│   ├── collect_and_predict.py    (autentica, consulta Nebula Logger, roda Prophet + Isolation Forest, gera JSON)
+│   ├── process_feedback.py       (lê o corpo de uma Issue de feedback, atualiza feedback.json)
+│   ├── weekly_retrain.py         (recalibra o modelo usando feedback.json + histórico)
+│   └── requirements.txt          (prophet, scikit-learn, pandas, requests)
+├── site/                          (fonte do GitHub Pages)
+│   ├── index.html
+│   ├── styles.css
+│   └── app.js                     (fetch dos JSONs, auto-refresh, gráficos, botão de feedback)
+└── data/                          (só existe no branch `data`, não em `master`)
+    ├── latest.json                (snapshot atual: risk_score, previsão, timestamp)
+    ├── history.json               (janela de 30 dias, usada nos gráficos de tendência)
+    ├── alerts.json                (lista de alertas/problemas detectados)
+    └── feedback.json              (registros de falso positivo, usados no retreino)
+
+.github/workflows/
+├── monitoring-collect.yml         (cron */5 * * * *, coleta + predição + commit no branch data)
+├── monitoring-feedback.yml        (on: issues opened com label 'feedback', processa e commita)
+├── monitoring-retrain.yml         (cron semanal, retreina os modelos)
+└── monitoring-tests.yml           (roda pytest a cada push/PR em monitoring/**)
+```
 
 ---
 
-# FASE 0 — VALIDAÇÃO DE CONECTIVIDADE (CRÍTICA)
+## SOQL DE COLETA (Nebula Logger)
 
-## Objetivo
-
-Provar, com o menor esforço possível, que os três elos da corrente funcionam dentro da estrutura da empresa:
-1. Apps Script consegue autenticar e ler dados do Salesforce
-2. Apps Script consegue chamar o Colab e receber uma resposta
-3. O pipeline de CI/CD consegue testar e publicar essa solução automaticamente
-
-**Nada de lógica de negócio nesta fase.** Sem Nebula Logger real, sem Prophet, sem Isolation Forest, sem alertas. Só "a chamada funciona ou não funciona" — respondido em uma planilha simples.
-
-## Por que isso importa (riscos que só aparecem na estrutura real da empresa)
-
-Estes riscos não aparecem em teoria, só testando na prática:
-
-| Risco | Como se manifesta | Por que só descobre testando |
-|-------|--------------------|-------------------------------|
-| Salesforce Trusted IP Ranges | Login OAuth rejeitado mesmo com credenciais corretas | Apps Script roda em IPs compartilhados do Google, não no IP da empresa |
-| Connected App exige aprovação de admin | Token não é emitido / erro `invalid_grant` | Só aparece ao tentar o fluxo OAuth de verdade |
-| Google Workspace Admin bloqueia `UrlFetchApp` externo | Apps Script não consegue chamar URLs fora do domínio Google | Política de segurança do Workspace, invisível até testar |
-| Google Workspace bloqueia criação de Triggers | Agendamento a cada 5 min simplesmente não dispara | Só aparece ao tentar criar o trigger |
-| ngrok (túnel do Colab) bloqueado por proxy corporativo | Timeout constante nas chamadas ao Colab | Depende da política de rede/segurança da empresa |
-
-Se qualquer um desses bloquear, é melhor descobrir em 3-5 dias (Fase 0) do que depois de 3 semanas construindo o MVP completo (Fase 1).
-
-## Decisão Técnica: "Chamar o MCP" via Apps Script
-
-**Importante esclarecimento:** o MCP Salesforce do repositório (`SALESFORCE_MCP_SETUP.md`) é projetado para ser usado pelo Claude Desktop/Code, que sobe o servidor MCP localmente (via `npx`, comunicação stdio) na máquina do usuário. O Google Apps Script roda nos servidores do Google e **não consegue conversar com um processo MCP local** — não existe rede entre eles.
-
-**Solução:** Apps Script vai fazer exatamente o que o MCP faz por baixo dos panos — autenticar via OAuth 2.0 e chamar a REST API do Salesforce diretamente (`UrlFetchApp`). O resultado funcional é o mesmo (dados do Salesforce chegam ao Apps Script), só que sem a camada de abstração MCP, que não faz sentido para um script (MCP existe para agentes de IA como o Claude, não para scripts tradicionais).
-
-Setup necessário (uma vez, manual):
-1. Reutilizar o Connected App já documentado em `SALESFORCE_MCP_SETUP.md`, OU criar um Connected App dedicado para o Apps Script (recomendado, para isolar permissões)
-2. Gerar um `refresh_token` uma única vez (via fluxo OAuth padrão ou Workbench/Postman)
-3. Guardar `client_id`, `client_secret`, `refresh_token` em **Script Properties** do Apps Script (nunca hardcoded no código)
-
-## Componentes da Fase 0
-
-### 1. Google Sheets (ultra simples — 2 abas)
-
-Planilha: `SF-Predictive-POC`
-
-**Aba `Config`:**
-| Chave | Valor |
-|-------|-------|
-| COLAB_MOCK_URL | (URL do ngrok, atualizada manualmente a cada sessão do Colab) |
-| LAST_RUN | (timestamp da última execução) |
-| PHASE | 0 |
-
-**Aba `Log`:**
-| Timestamp | Test | Status | DurationMs | Details |
-|-----------|------|--------|------------|---------|
-
-### 2. Google Apps Script
-
-Estrutura de arquivos:
-```
-phase0-poc/apps-script/
-├── Code.gs                 (orquestrador)
-├── SalesforceConnector.gs  (auth + chamada REST)
-├── ColabConnector.gs       (chamada ao mock do Colab)
-├── SheetLogger.gs          (grava resultado na aba Log)
-├── appsscript.json         (manifest do projeto)
+```sql
+SELECT Id, Message__c, ServiceDuration__c, StatusCode__c, CreatedDate
+FROM Log__c
+WHERE CreatedDate = LAST_N_MINUTES:30
+ORDER BY CreatedDate DESC
+LIMIT 500
 ```
 
-**`SalesforceConnector.gs`** — autentica e faz 1 SOQL trivial:
-```javascript
-function testSalesforceConnection_() {
-  const start = new Date().getTime();
-  try {
-    const props = PropertiesService.getScriptProperties();
-    const tokenResponse = UrlFetchApp.fetch('https://login.salesforce.com/services/oauth2/token', {
-      method: 'post',
-      payload: {
-        grant_type: 'refresh_token',
-        client_id: props.getProperty('SF_CLIENT_ID'),
-        client_secret: props.getProperty('SF_CLIENT_SECRET'),
-        refresh_token: props.getProperty('SF_REFRESH_TOKEN')
-      },
-      muteHttpExceptions: true
-    });
-    const tokenData = JSON.parse(tokenResponse.getContentText());
-    if (!tokenData.access_token) throw new Error('Sem access_token: ' + tokenResponse.getContentText());
+Autenticação: OAuth 2.0 `refresh_token` grant contra `https://login.salesforce.com/services/oauth2/token`, mesmas credenciais do Connected App já documentado em `SALESFORCE_MCP_SETUP.md`, agora armazenadas como **GitHub Secrets** (`SF_CLIENT_ID`, `SF_CLIENT_SECRET`, `SF_REFRESH_TOKEN`) em vez de Script Properties do Apps Script.
 
-    const queryUrl = tokenData.instance_url + '/services/data/v60.0/query?q=' +
-      encodeURIComponent('SELECT Id FROM User LIMIT 1');
-    const queryResponse = UrlFetchApp.fetch(queryUrl, {
-      headers: { Authorization: 'Bearer ' + tokenData.access_token },
-      muteHttpExceptions: true
-    });
+**Nota sobre "MCP":** como já esclarecido na versão anterior deste plano, o MCP Salesforce é feito para ser consumido por agentes de IA (Claude), não por scripts. O workflow do GitHub Actions replica o mesmo fluxo OAuth + REST que o MCP usa por baixo dos panos, em Python puro (`requests`), sem a camada MCP.
 
-    return {
-      success: queryResponse.getResponseCode() === 200,
-      details: queryResponse.getContentText().substring(0, 200),
-      durationMs: new Date().getTime() - start
-    };
-  } catch (e) {
-    return { success: false, details: e.message, durationMs: new Date().getTime() - start };
-  }
-}
-```
+---
 
-**`ColabConnector.gs`** — chama o mock do Colab:
-```javascript
-function testColabConnection_() {
-  const start = new Date().getTime();
-  try {
-    const colabUrl = getConfigValue_('COLAB_MOCK_URL');
-    const response = UrlFetchApp.fetch(colabUrl + '/mock', { muteHttpExceptions: true });
-    const data = JSON.parse(response.getContentText());
-    return {
-      success: data.status === 'ok',
-      details: JSON.stringify(data),
-      durationMs: new Date().getTime() - start
-    };
-  } catch (e) {
-    return { success: false, details: e.message, durationMs: new Date().getTime() - start };
-  }
-}
-```
-
-**`Code.gs`** — orquestrador + trigger:
-```javascript
-function runPhase0Validation() {
-  logResult_('Salesforce_REST_Auth', testSalesforceConnection_());
-  logResult_('Colab_Mock', testColabConnection_());
-}
-
-function createTimeTrigger() {
-  ScriptApp.newTrigger('runPhase0Validation')
-    .timeBased()
-    .everyMinutes(5)
-    .create();
-}
-```
-
-### 3. Google Colab (mock puro)
-
-```
-phase0-poc/colab/
-├── phase0_mock.ipynb   (notebook real, roda no Colab)
-├── mock_api.py         (mesma lógica, espelhada para testes no CI)
-```
-
-**Lógica do mock** (`mock_api.py`, roda tanto no Colab quanto localmente no CI):
-```python
-from flask import Flask, jsonify
-
-app = Flask(__name__)
-
-@app.route('/mock', methods=['GET', 'POST'])
-def mock():
-    return jsonify({"status": "ok", "source": "colab-mock", "message": "Colab reachable"})
-
-if __name__ == '__main__':
-    app.run()
-```
-
-No notebook do Colab, célula adicional expõe isso publicamente via `pyngrok`:
-```python
-!pip install flask pyngrok
-from pyngrok import ngrok
-public_url = ngrok.connect(5000)
-print(public_url)  # copiar essa URL para a aba Config da planilha
-```
-
-**Limitação conhecida e aceita:** URLs do ngrok free são efêmeras — a cada nova sessão do Colab, o usuário precisa copiar a nova URL para a aba `Config`. Isso é aceitável para a Fase 0 e POC; se virar gargalo operacional na Fase 3+, avaliar alternativa (servidor próprio, Replit, etc.).
-
-### 4. Pipeline GitHub Actions (testes + deploy)
-
-```
-.github/workflows/phase0-ci.yml
-```
+## EXEMPLO DE WORKFLOW (coleta + predição)
 
 ```yaml
-name: Phase 0 - CI/CD POC
+name: Coleta e Predição - Nebula Logger
 on:
-  push:
-    branches: [master]
-    paths: ['phase0-poc/**']
-  pull_request:
-    paths: ['phase0-poc/**']
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
-  unit-tests-python:
+  collect-predict:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
-      - run: pip install flask pytest
-      - run: pytest phase0-poc/tests/test_mock_api.py -v
+      - run: pip install -r monitoring/scripts/requirements.txt
+      - run: python monitoring/scripts/collect_and_predict.py --output-dir /tmp/data-output
+        env:
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_CLIENT_SECRET: ${{ secrets.SF_CLIENT_SECRET }}
+          SF_REFRESH_TOKEN: ${{ secrets.SF_REFRESH_TOKEN }}
+      - name: Publica no branch data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin data
+          git checkout data
+          mkdir -p monitoring/data
+          cp -r /tmp/data-output/* monitoring/data/
+          git add monitoring/data/
+          git commit -m "Atualiza dados de monitoramento $(date -u +%Y-%m-%dT%H:%M:%SZ)" || echo "Sem mudanças"
+          git push origin data
+```
 
-  unit-tests-appsscript:
+**Permissão necessária:** o token padrão do GitHub Actions (`GITHUB_TOKEN`) precisa de `permissions: contents: write` no workflow para conseguir commitar — mesmo padrão já usado no `snake.yml` existente neste repositório.
+
+---
+
+## FRONT-END (GitHub Pages)
+
+```javascript
+// monitoring/site/app.js
+const DATA_BASE = 'https://raw.githubusercontent.com/brunotrolo/brunotrolo/data/monitoring/data';
+
+async function fetchLatest() {
+  const res = await fetch(`${DATA_BASE}/latest.json?t=${Date.now()}`); // evita cache
+  return res.json();
+}
+
+function renderDashboard(data) {
+  document.getElementById('risk-score').textContent = data.risk_score.toFixed(2);
+  document.getElementById('last-updated').textContent = data.timestamp;
+  // health check simplificado: dado desatualizado?
+  const ageMinutes = (Date.now() - new Date(data.timestamp)) / 60000;
+  document.getElementById('health-banner').style.display = ageMinutes > 15 ? 'block' : 'none';
+}
+
+async function refresh() {
+  renderDashboard(await fetchLatest());
+}
+setInterval(refresh, 5 * 60 * 1000);
+refresh();
+```
+
+**Botão de feedback (marca falso positivo via GitHub Issues, sem backend próprio):**
+```html
+<a id="feedback-link" href="#" target="_blank">Marcar como Falso Positivo</a>
+<script>
+function buildFeedbackLink(alertId) {
+  const title = encodeURIComponent(`Feedback: Falso Positivo (${alertId})`);
+  const body = encodeURIComponent(`alert_id: ${alertId}\ntimestamp: ${new Date().toISOString()}`);
+  return `https://github.com/brunotrolo/brunotrolo/issues/new?title=${title}&labels=feedback&body=${body}`;
+}
+</script>
+```
+
+O usuário clica, o GitHub abre a página nativa de criar Issue já preenchida, ele confirma com a própria conta do GitHub — sem exposição de token, sem servidor de escrita próprio.
+
+---
+
+## PROCESSAMENTO DO FEEDBACK (Issues → dados)
+
+```yaml
+name: Processa Feedback de Monitoramento
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  process-feedback:
+    if: contains(github.event.issue.labels.*.name, 'feedback')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - run: npm install --save-dev jest
-      - run: npx jest phase0-poc/tests/appsscript.test.js
-
-  deploy-apps-script:
-    needs: [unit-tests-python, unit-tests-appsscript]
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - run: npm install -g @google/clasp
-      - run: echo "${{ secrets.CLASP_CREDENTIALS }}" > ~/.clasprc.json
-      - run: cd phase0-poc/apps-script && clasp push --force
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: python monitoring/scripts/process_feedback.py
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+      - name: Commita no branch data e fecha a Issue
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin data && git checkout data
+          git add monitoring/data/feedback.json
+          git commit -m "Feedback registrado via Issue #${{ github.event.issue.number }}"
+          git push origin data
+      - run: gh issue close ${{ github.event.issue.number }} --comment "Feedback registrado, obrigado!"
+        env: { GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
 ```
 
-**Teste unitário do mock (Python/pytest):**
-```python
-# phase0-poc/tests/test_mock_api.py
-from phase0_poc.colab.mock_api import app
+---
 
-def test_mock_endpoint_returns_ok():
-    client = app.test_client()
-    response = client.get('/mock')
-    assert response.status_code == 200
-    assert response.get_json()['status'] == 'ok'
-```
+## FASES
 
-**Nota sobre "publicar nas plataformas":** o deploy automático real (`clasp push`) funciona para o Apps Script. Para o Colab **não existe deploy via API** no sentido tradicional — o notebook precisa ser aberto e executado manualmente pelo usuário (ou por uma automação futura). O CI garante que a lógica do mock (espelhada em `mock_api.py`) está testada e versionada, mas a execução real no Colab continua manual nesta fase. Isso é uma limitação conhecida do Colab, não do pipeline.
+### Fase 0 — Validação de Conectividade (reduzida)
 
-## Passo a Passo de Setup (Fase 0)
+Com essa arquitetura, o número de elos externos cai de 2 (Salesforce + Colab) para 1 (só Salesforce) — o ML já roda dentro do próprio runner, então não existe mais "o Colab não acordou". A validação fica mais simples:
 
-1. Criar a planilha `SF-Predictive-POC` no Google Drive com as abas `Config` e `Log`
-2. Criar o projeto Apps Script vinculado à planilha (`clasp create` ou via UI)
-3. No Salesforce: criar/reutilizar Connected App, gerar `refresh_token` uma vez
-4. Salvar credenciais em Script Properties do Apps Script
-5. Abrir o notebook `phase0_mock.ipynb` no Colab, rodar as células (sobe Flask + ngrok)
-6. Copiar a URL do ngrok para a aba `Config`
-7. Rodar `runPhase0Validation()` manualmente uma vez — validar que a aba `Log` recebeu 2 linhas com `Status = OK`
-8. Criar o trigger de 5 em 5 minutos (`createTimeTrigger()`) e deixar rodar por 1h (12 execuções)
-9. Configurar `clasp login` localmente uma vez, extrair `~/.clasprc.json`, salvar como secret `CLASP_CREDENTIALS` no GitHub
-10. Fazer push do código para o repositório, verificar que o pipeline roda verde e faz deploy
+**Definition of Done:**
+- [ ] Workflow do GitHub Actions autentica no Salesforce (via Secrets) e executa 1 SOQL trivial com sucesso
+- [ ] Workflow consegue commitar um JSON de teste no branch `data` (valida `permissions: contents: write`)
+- [ ] GitHub Pages está habilitado e serve o site estático publicamente
+- [ ] Página de teste consegue buscar o JSON via `raw.githubusercontent.com` e exibir na tela
+- [ ] Workflow roda no cron (`*/5 * * * *`) por pelo menos 1 hora sem falha
+- [ ] Testes unitários (pytest) rodam no CI antes de qualquer merge
 
-## Definition of Done (Fase 0)
-
-- [ ] Apps Script autentica no Salesforce e lê 1 registro real via REST API
-- [ ] Resultado gravado na aba `Log` com timestamp, status e duração
-- [ ] Apps Script chama o mock do Colab e recebe `{"status": "ok"}`
-- [ ] Resultado do Colab também gravado na aba `Log`
-- [ ] Trigger de 5 em 5 minutos roda por pelo menos 1 hora contínua sem erro (12 execuções)
-- [ ] Pipeline GitHub Actions roda testes unitários (Python + Apps Script) e fica verde
-- [ ] Pipeline faz deploy automático do Apps Script via `clasp push` ao mesclar na `master`
-- [ ] Nenhum bloqueio de rede/firewall identificado nas chamadas ao Salesforce ou ao ngrok
-
-**Se qualquer item falhar:** documentar o erro exato na aba `Log`, escalar para o time de infraestrutura/segurança da empresa antes de avançar para a Fase 1.
-
-## Riscos Específicos da Fase 0
+**Riscos específicos:**
 
 | Risco | Mitigação |
 |-------|-----------|
-| Trusted IP Range da Salesforce rejeita IP do Apps Script | Configurar relaxamento de IP no Connected App ou liberar range do Google Cloud |
-| Workspace Admin bloqueia `UrlFetchApp` para domínios externos | Escalar para o admin do Workspace da empresa; validar política em Admin Console |
-| Workspace Admin desabilita criação de Triggers | Escalar para o admin; alternativa: execução manual/botão no Web App |
-| ngrok bloqueado por proxy corporativo | Testar de rede pessoal vs. corporativa; considerar alternativa ao ngrok se bloqueado permanentemente |
+| Salesforce Trusted IP Range rejeita os IPs dos runners do GitHub (dinâmicos/compartilhados) | Relaxar IP restriction no Connected App, ou allowlist dos ranges de IP publicados pelo GitHub |
+| Cron do GitHub Actions atrasa em picos de carga (documentado pelo próprio GitHub) | Tratar 5 min como alvo, não garantia rígida; monitorar horário real das execuções no histórico de Actions |
+| Repositório precisa ser público para Pages gratuito + Actions com minutos ilimitados | Confirmar visibilidade do repositório antes de iniciar |
 | `refresh_token` expira ou é revogado | Documentar processo de renovação manual no runbook |
 
 ---
 
-# FASE 1 — MVP FUNCIONAL
+### Fase 1 — MVP Real
+- `collect_and_predict.py` funcional: coleta real do Nebula Logger, Prophet + Isolation Forest reais (não mocks)
+- `latest.json` e `history.json` populados a cada execução
+- Site no GitHub Pages exibindo risco atual e histórico
 
-**Pré-requisito:** Fase 0 com Definition of Done 100% completo.
-
-**Objetivo:** Substituir os mocks por lógica real.
-
-- Apps Script consulta Nebula Logger de verdade (últimos 30 min, a cada 5 min) via REST API
-- Colab roda Prophet (previsão de latência) + Isolation Forest (detecção de anomalias) de verdade
-- Apps Script grava toda execução na aba `Log` (histórico) da planilha
-- Se anomalia/problema detectado → grava também na aba `Problemas`
-
-**Estrutura de dados (Sheets ampliada):**
-
-Aba `Metrics_5min`: timestamp, serviço, latência média, taxa de erro, risk_score
-Aba `Problemas`: timestamp, serviço, risk_score, severidade, descrição, status (Novo/Reconhecido/Resolvido/Falso Positivo)
-
-**Lógica ML no Colab** (retorno do endpoint `/predict`):
-```json
-{
-  "risk_score": 0.85,
-  "predicted_latency_ms": 820,
-  "minutes_until_failure": 7,
-  "anomaly_count": 3,
-  "confidence": 0.92
-}
-```
-
-Reaproveita a lógica de Prophet (decomposição de tendência/sazonalidade/changepoints) + Isolation Forest (detecção de outliers em latência, taxa de erro, status de circuit breaker) já desenhada nas iterações anteriores deste plano.
-
----
-
-# FASE 2 — SEVERIDADE E COMUNICAÇÃO
-
-**Objetivo:** Quando um problema é gravado na aba `Problemas` com severidade alta, disparar comunicação automaticamente.
-
-**Regra de severidade:**
+### Fase 2 — Severidade e Comunicação
+Mesma regra de severidade da versão anterior:
 ```
 risk_score > 0.85           → CRÍTICA
 0.70 < risk_score <= 0.85   → ALTA
 0.40 < risk_score <= 0.70   → MÉDIA
-risk_score <= 0.40          → BAIXA (não alerta, só loga)
+risk_score <= 0.40          → BAIXA (só loga)
 ```
+Canal de comunicação: sem Apps Script (que tinha `MailApp` nativo), o envio de email a partir do GitHub Actions usa uma Action pronta (ex.: `dawidd6/action-send-mail`) com SMTP configurado via Secrets, ou um webhook do Slack (`curl` simples para a URL do webhook) — ambos triviais de adicionar ao workflow de coleta quando `risk_score` ultrapassa o limiar.
 
-**Canais de comunicação (por ordem de simplicidade de implementação):**
+### Fase 3 — Feedback Contínuo e Indicador de Saúde
+- Loop de feedback via Issues já detalhado acima
+- `weekly_retrain.py` roda em cron semanal, lê `feedback.json` + `history.json`, recalibra `contamination` do Isolation Forest e re-treina o Prophet
+- Indicador de saúde no dashboard: como não existe mais "Colab dormindo", o indicador passa a ser **"dados desatualizados"** — se o `timestamp` do `latest.json` estiver mais velho que o esperado (ex.: >15 min), o front-end mostra um banner de alerta. Isso cobre falhas reais (Salesforce fora do ar, rate limit, workflow falhando) sem o risco de sessão que o Colab tinha.
 
-1. **Email nativo** (`MailApp.sendEmail()`) — zero configuração extra, disponível direto no Apps Script
-2. **Slack Incoming Webhook** — só precisa de 1 URL, `UrlFetchApp.fetch()` simples
-3. **WhatsApp** — atenção: a integração de WhatsApp existente é um servidor MCP, consumido por um agente Claude — não é diretamente chamável pelo Apps Script. Para usar WhatsApp a partir do Apps Script, seria necessário expor a API subjacente do WhatsApp (a que o MCP server usa por baixo dos panos) como um endpoint HTTP simples que o Apps Script possa chamar. Investigar isso como item separado antes de assumir como canal Fase 2.
-
-**Recomendação:** Começar com Email (Fase 2 imediata, zero risco), adicionar Slack como upgrade rápido, avaliar WhatsApp como stretch goal após validar a API subjacente.
-
----
-
-# FASE 3 — APRENDIZADO CONTÍNUO E RESILIÊNCIA
-
-**Objetivo:** Sistema fica mais preciso sozinho + não fica "cego" se o Colab estiver dormindo.
-
-### 3.1 Feedback Loop (aprendizado autônomo)
-
-- Usuário marca um registro da aba `Problemas` como "Falso Positivo" (na planilha ou em um Web App simples)
-- Rotina semanal no Colab lê os feedbacks, recalibra o `contamination` do Isolation Forest, re-treina o Prophet com a janela de 30 dias
-- Modelo fica mais preciso semana a semana sem intervenção manual
-
-### 3.2 Health Monitoring + Fallback
-
-- Web App do Apps Script exibe painel de saúde: status do Colab (🟢 OK / 🔴 Dormindo / 🟡 Timeout), última execução bem-sucedida, falhas consecutivas
-- Se Colab não responder (timeout), Apps Script:
-  - Registra `COLAB_SLEEPING` na aba `Config`/`Log` — **não esconde a falha**
-  - Opcional: aplica fallback heurístico simples (média móvel + desvio padrão) direto no Apps Script, para não ficar 100% cego enquanto o Colab não acorda
-- Botão manual no Web App para forçar nova tentativa de "acordar" o Colab
-
----
-
-# FASE 4 — HARDENING
-
-- Rate limiting nas chamadas ao Salesforce (respeitar limites de API)
-- Retry com backoff exponencial nas chamadas ao Colab
-- Auditoria: quem marcou o quê como falso positivo, quando
-- Runbook de troubleshooting (o que fazer se Colab não acorda, se token expira, etc.)
-- Revisão de retenção de dados nas abas do Sheets (evitar planilha crescer indefinidamente)
-
----
-
-## ESTRUTURA DE REPOSITÓRIO (visão completa, todas as fases)
-
-```
-brunotrolo/
-├── PREDICTIVE_MONITORING_PLAN.md      ← este documento
-├── phase0-poc/
-│   ├── apps-script/
-│   │   ├── Code.gs
-│   │   ├── SalesforceConnector.gs
-│   │   ├── ColabConnector.gs
-│   │   ├── SheetLogger.gs
-│   │   └── appsscript.json
-│   ├── colab/
-│   │   ├── phase0_mock.ipynb
-│   │   └── mock_api.py
-│   └── tests/
-│       ├── test_mock_api.py
-│       └── appsscript.test.js
-├── monitoring/                         ← Fase 1+ (código real)
-│   ├── apps-script/
-│   ├── colab/
-│   │   ├── predictive_model.ipynb
-│   │   ├── prophet_forecast.py
-│   │   └── isolation_forest_anomaly.py
-│   └── tests/
-└── .github/
-    └── workflows/
-        ├── phase0-ci.yml
-        └── monitoring-ci.yml           ← Fase 1+
-```
+### Fase 4 — Hardening
+- Paginação SOQL se o volume de logs ultrapassar 2.000 registros (`nextRecordsUrl`)
+- Retry com backoff exponencial nas chamadas ao Salesforce
+- Rotina de poda do branch `data` se o histórico de commits crescer demais (squash periódico, sem afetar `master`)
+- Rotação de credenciais (Secrets do GitHub)
+- Runbook de troubleshooting
 
 ---
 
 ## DECISÕES TÉCNICAS CRÍTICAS (resumo)
 
-1. **"MCP" a partir do Apps Script = REST API direta.** MCP é protocolo para agentes de IA (Claude), não para scripts. Apps Script replica o que o MCP faz por baixo (OAuth + REST), sem a camada MCP.
-2. **Colab sem HTTP nativo → ngrok.** URLs efêmeras são uma limitação aceita nesta fase.
-3. **ML fica fora do Salesforce, orquestração fica dentro do fluxo Google.** Nada de Apex/LWC nesta arquitetura — tudo Apps Script + Sheets + Colab.
-4. **WhatsApp MCP não é diretamente utilizável pelo Apps Script** sem expor a API subjacente como HTTP simples — tratado como item de investigação separado, não bloqueante.
-5. **Deploy do Colab não é automatizável via CI** da forma tradicional — CI testa e versiona a lógica espelhada, execução real permanece manual até decisão de migrar para outra plataforma.
+1. **GitHub Actions substitui Apps Script + Colab.** ML real (Prophet + Isolation Forest) roda no mesmo job que coleta os dados — elimina o segundo salto que existia com o Colab, e com ele o ngrok e a dependência de sessão/navegador aberto.
+2. **Branch `data` separado de `master`.** Evita poluir o histórico de código com commits de dados a cada 5 minutos.
+3. **GitHub Pages quase não faz redeploy.** O front-end busca dados direto via `raw.githubusercontent.com` do branch `data`, então o site (HTML/CSS/JS) só precisa ser republicado quando a interface muda, não quando os dados mudam.
+4. **GitHub Issues é o único mecanismo de escrita.** Usado exclusivamente para o feedback de falso positivo — sem precisar de nenhum backend customizado, usando a própria autenticação do GitHub.
+5. **"MCP" continua não sendo chamado diretamente** — o Python do GitHub Actions replica o fluxo OAuth + REST do Salesforce, mesma lógica documentada desde a v1 deste plano.
 
 ---
 
-## CRITÉRIOS DE SUCESSO GERAIS
+## CRITÉRIOS DE SUCESSO
 
-- Fase 0 conclui em até 5 dias úteis com todos os itens do Definition of Done atendidos
-- Fase 1 gera previsões reais com pelo menos 70% de precisão inicial (melhorando nas fases seguintes)
-- Fase 2 dispara alerta por email em menos de 1 minuto após detecção de severidade alta
+- Fase 0 conclui em poucos dias, com todos os itens do Definition of Done atendidos
+- Fase 1 gera previsões reais com o mesmo padrão de precisão inicial esperado (~70%, melhorando nas fases seguintes)
+- Fase 2 dispara alerta em menos de 1 minuto após detecção de severidade alta
 - Fase 3 mostra redução de falsos positivos semana a semana
-- Custo total do projeto: **$0-10/mês** (ngrok free, Colab free, Apps Script/Sheets gratuitos, GitHub Actions dentro do free tier)
+- **Custo total: $0/mês** — GitHub Actions e Pages são gratuitos para repositórios públicos, sem qualquer dependência de Colab, ngrok, Apps Script ou Google Sheets
+- **Disponibilidade real 24/7** — sem depender de navegador aberto, ao contrário da v1 deste plano
