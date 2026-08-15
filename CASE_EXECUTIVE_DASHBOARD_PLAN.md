@@ -316,20 +316,58 @@ Ambos os dashboards (monitoramento preditivo e Casos) podem conviver no **mesmo 
 
 ## FASES
 
-### Fase 1 — MVP (coleta + armazenamento + Web page básica)
-- `collect_cases.py` funcional, commit automático no branch `data`
-- Página estática simples no GitHub Pages exibindo tabela de casos, sem toggles ainda
+### Fase 0 — MVP com Dados Mockados (sem Salesforce)
+
+**Objetivo:** Validar arquitetura completa (micro-serviços, testes, logging) **sem depender de Salesforce real**. Dados mockados simulam casos reais.
+
+**Setup e Testes:**
+```bash
+# 1. Instalar dependências
+pip install -r services/aggregation/requirements.txt
+pip install pytest pytest-cov
+
+# 2. Rodar testes (tudo com mocks)
+pytest services/aggregation/ -v --cov=services/aggregation
+
+# 3. Rodar pipeline completo
+python case-dashboard/scripts/orchestrate.py --mode mock --log-file /tmp/cases.log
+
+# 4. Inspecionar logs
+tail -50 /tmp/cases.log | jq .
+
+# 5. Verificar JSONs gerados
+cat case-dashboard/data/snapshot.json | jq .
+```
+
+**Definition of Done:**
+- [ ] Testes pytest passando com ≥80% coverage
+- [ ] Logs estruturados registram cada operação
+- [ ] JSONs (snapshot.json, metrics_history.json) são gerados
+- [ ] Front-end renderiza dashboard com dados mockados
+- [ ] GitHub Pages serve o dashboard
+- [ ] Transição para dados reais requer ≤5 mudanças
+
+**Transição para Fase 1:**
+1. Obter credenciais OAuth
+2. Adicionar nos GitHub Secrets
+3. Trocar `services/aggregation/src/mock_cases.py` por `salesforce_client.py`
+4. Rodar testes — tudo funciona igual
+
+### Fase 1 — Produção com Dados Reais (Salesforce)
+- `services/aggregation/src/collect_cases.py` funcional com Salesforce real
+- Commit automático no branch `data` a cada 10 min
+- Página no GitHub Pages exibindo tabela de casos com dados reais
 - **Definition of Done:** site publicado, mostrando dados reais de Case, atualizados a cada 10 min
 
-### Fase 2 — Dashboard completo (toggles + gráficos + auto-refresh)
+### Fase 2 — Dashboard Completo (toggles + gráficos + auto-refresh)
 - Implementa os 3 toggles e os gráficos (Google Charts: barras para distribuição, linha para tendência)
 - Auto-refresh a cada 10 min sem reload manual
 - **Definition of Done:** toggles funcionam instantaneamente (sem novo fetch), dashboard atualiza sozinho
 
 ### Fase 3 — Hardening
-- `case-dashboard-tests.yml`: testes unitários (pytest para `collect_cases.py`, Jest para a lógica de agregação em `app.js`)
-- Paginação SOQL se necessário
-- Indicador de "dados desatualizados" se o `timestamp` do snapshot estiver mais velho que o esperado (mesma filosofia do projeto irmão)
+- Paginação SOQL se volume de Cases > 2.000
+- Indicador de "dados desatualizados" se `timestamp` estiver > 15 min
+- CI/CD: testes rodando antes de deploy (pytest + Jest coverage ≥80%)
 
 ---
 

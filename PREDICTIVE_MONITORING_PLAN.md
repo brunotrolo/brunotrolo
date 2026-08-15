@@ -485,36 +485,79 @@ jobs:
 
 ## FASES
 
-### Fase 0 — Validação de Conectividade (reduzida)
+### Fase 0 — MVP com Dados Mockados (sem Salesforce)
 
-Com essa arquitetura, o número de elos externos cai de 2 (Salesforce + Colab) para 1 (só Salesforce) — o ML já roda dentro do próprio runner, então não existe mais "o Colab não acordou". A validação fica mais simples:
+**Objetivo:** Validar arquitetura de micro-serviços + testes + logging estruturado **sem depender de Salesforce real**. Nebula Logger será implantado durante a semana; nessa fase, usamos dados mockados via `mock_salesforce.py`.
+
+**Abordagem:**
+- Toda a lógica (coleta, heurística, comparação) roda com dados fictícios
+- Testes unitários passam com ≥80% coverage
+- Logs estruturados registram cada operação (DEBUG, INFO, ERROR)
+- Transição para dados reais é trivial (≤5 linhas de código)
+
+**Setup e Testes:**
+```bash
+# 1. Instalar dependências
+pip install -r services/collector/requirements.txt
+pip install -r services/heuristic/requirements.txt  
+pip install pytest pytest-cov
+
+# 2. Rodar testes backend (tudo com mocks)
+pytest services/ -v --cov=services
+
+# 3. Rodar testes frontend (tudo com mocks)
+npm test
+
+# 4. Rodar pipeline completo (coleta → heurística → JSONs)
+python monitoring/scripts/orchestrate.py --mode mock --log-file /tmp/monitoring.log
+
+# 5. Inspecionar logs estruturados
+tail -50 /tmp/monitoring.log | jq .
+```
 
 **Definition of Done:**
-- [ ] Workflow do GitHub Actions autentica no Salesforce (via Secrets) e executa 1 SOQL trivial com sucesso
-- [ ] Workflow consegue commitar um JSON de teste no branch `data` (valida `permissions: contents: write`)
-- [ ] GitHub Pages está habilitado e serve o site estático publicamente
-- [ ] Página de teste consegue buscar o JSON via `raw.githubusercontent.com` e exibir na tela
-- [ ] Workflow roda no cron (`*/5 * * * *`) por pelo menos 1 hora sem falha
-- [ ] Testes unitários (pytest) rodam no CI antes de qualquer merge
+- [ ] Testes pytest passando com ≥80% coverage
+- [ ] Testes Jest passando
+- [ ] Logs estruturados registram início/fim/erro de cada operação
+- [ ] JSONs (latest.json, history.json) são gerados corretamente
+- [ ] Front-end consegue buscar dados de mock e renderizar dashboard
+- [ ] GitHub Pages serve o dashboard com dados mockados
+- [ ] Transição para Salesforce real requer ≤5 mudanças de código
 
-**Riscos específicos:**
+**Arquitetura Micro-Serviços (Fase 0+):**
+Veja `ARCHITECTURE.md` para detalhes completos:
+- `services/collector/`: busca logs (mock ou Salesforce)
+- `services/heuristic/`: calcula risk_score
+- `services/shared/`: logger JSON, schemas, utils agnósticos
+- `site/monitoring/`: dashboard com mock data
+- `site/shared/`: componentes reutilizáveis
 
-| Risco | Mitigação |
-|-------|-----------|
-| Salesforce Trusted IP Range rejeita os IPs dos runners do GitHub (dinâmicos/compartilhados) | Relaxar IP restriction no Connected App, ou allowlist dos ranges de IP publicados pelo GitHub |
-| Cron do GitHub Actions atrasa em picos de carga (documentado pelo próprio GitHub) | Tratar 5 min como alvo, não garantia rígida; monitorar horário real das execuções no histórico de Actions |
-| Repositório precisa ser público para Pages gratuito + Actions com minutos ilimitados | Confirmar visibilidade do repositório antes de iniciar |
-| `refresh_token` expira ou é revogado | Documentar processo de renovação manual no runbook |
+**Transição para Fase 1 (dados reais):**
+1. Implantar Nebula Logger na org Salesforce
+2. Obter credenciais OAuth
+3. Adicionar nos GitHub Secrets (`SF_CLIENT_ID`, `SF_CLIENT_SECRET`, `SF_REFRESH_TOKEN`)
+4. Em `services/collector/src/collector.py`, trocar:
+   ```python
+   # Fase 0:
+   from mock_salesforce import MockSalesforceClient
+   client = MockSalesforceClient()
+   
+   # Fase 1:
+   from salesforce_client import SalesforceClient
+   client = SalesforceClient(os.getenv("SF_CLIENT_ID"), ...)
+   ```
+5. Rodar testes novamente — tudo funciona igual
+6. Commitar e fazer deploy no GitHub Actions
 
 **Troubleshooting Fase 0:**
 
 | Erro | Solução |
 |-----|---------|
-| `403 Forbidden` ao chamar Salesforce REST API | Verificar IP Trusted Range (veja seção de Setup acima) ou validar `refresh_token` manualmente com `curl` |
-| `401 Unauthorized` ("invalid_grant") | Token refresh falhou — `refresh_token` expirou ou foi revogado; obter novo token via OAuth flow |
-| `413 Payload Too Large` | SOQL retornou mais de 2.000 registros — implementar paginação via `nextRecordsUrl` (Fase 5) |
-| Workflow falha mas o job está como "passed" no GitHub | Verificar output do job (Actions → workflow → job) para stderr/exception real |
-| GitHub Pages não está servindo o site | Verificar Settings → Pages → Source (deve ser "Deploy from a branch") e que o branch `master` tem arquivo `monitoring/site/index.html` |
+| `ModuleNotFoundError: No module named 'pandas'` | `pip install -r services/collector/requirements.txt` |
+| `AssertionError: expected 143, got 0` em test_collector.py | Fixture mock não foi carregada — verificar `conftest.py` em `services/collector/tests/` |
+| Logs não aparecem em `/tmp/monitoring.log` | Verificar `--log-file` flag em comando `orchestrate.py` |
+| Front-end mostra `fetch failed` ao buscar mock data | Verificar se `site/monitoring/mock-data.js` está retornando JSON válido |
+| GitHub Pages não carrega dashboard | Verificar Settings → Pages → Source (branch `master`) e que `site/index.html` existe |
 
 ---
 
