@@ -9,11 +9,8 @@
 ============================================================================
 -->
 
-<picture>
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-light.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-dark.svg">
-  <img src="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-light.svg" alt="Bruno Teixeira" width="100%">
-</picture>
+<img src="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-light.svg#gh-light-mode-only" alt="Bruno Teixeira" width="100%">
+<img src="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-dark.svg#gh-dark-mode-only" alt="Bruno Teixeira" width="100%">
 
 <br>
 <br>
