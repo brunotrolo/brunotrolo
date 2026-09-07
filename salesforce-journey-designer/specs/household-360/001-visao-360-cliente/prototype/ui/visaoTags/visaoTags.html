@@ -1,0 +1,71 @@
+<template>
+    <!-- Tags de interesse — busca + filtro por categoria + remoção local (mock).
+         Entrada: @api tags {segmentos[], investimentos[], estilo[]}. Sem eventos. -->
+    <lightning-card>
+        <span slot="title" class="c-tags_titulo">
+            <span class="c-tags_titulo-icone" aria-hidden="true">
+                <lightning-icon icon-name="utility:list" size="xx-small" variant="inverse" alternative-text=""></lightning-icon>
+            </span>
+            Tags de interesse
+        </span>
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={temTags}>
+                <!-- Linha de busca (uma linha no desktop, empilha no mobile) -->
+                <div class="c-tags_busca">
+                    <lightning-combobox
+                        class="c-tags_busca-cat"
+                        label="Categoria"
+                        variant="label-hidden"
+                        placeholder="Todas as categorias"
+                        value={categoria}
+                        options={opcoesCategoria}
+                        onchange={aoTrocarCategoria}>
+                    </lightning-combobox>
+                    <lightning-input
+                        class="c-tags_busca-texto"
+                        type="search"
+                        label="Buscar tag"
+                        variant="label-hidden"
+                        placeholder="Digite o nome da tag…"
+                        value={busca}
+                        onchange={aoBuscar}>
+                    </lightning-input>
+                    <lightning-button-icon
+                        icon-name="standard:search"
+                        alternative-text="Buscar"
+                        title="Buscar"
+                        onclick={aoFocarBusca}>
+                    </lightning-button-icon>
+                    <lightning-button
+                        label="Explorar tags"
+                        variant="neutral"
+                        disabled
+                        title="Catálogo de tags é capacidade futura (fora do MVP)">
+                    </lightning-button>
+                </div>
+                <template for:each={gruposVisiveis} for:item="grupo">
+                    <div key={grupo.id} class="slds-m-top_x-small">
+                        <div class="c-tags_grupo">
+                            <lightning-icon icon-name={grupo.icone} size="xx-small" alternative-text={grupo.rotulo}></lightning-icon>
+                            {grupo.rotulo}
+                        </div>
+                        <div class="c-tags_pills">
+                            <template for:each={grupo.tags} for:item="tag">
+                                <lightning-pill
+                                    key={tag}
+                                    label={tag}
+                                    data-grupo={grupo.id}
+                                    data-tag={tag}
+                                    onremove={aoRemover}>
+                                </lightning-pill>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-body_small">Sem tags para esta raiz.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

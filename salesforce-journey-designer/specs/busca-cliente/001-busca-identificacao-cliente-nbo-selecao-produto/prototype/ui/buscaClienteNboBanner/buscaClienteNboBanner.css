@@ -1,0 +1,96 @@
+/* NBO card narrativa melhorada — Cartão Black */
+.c-nbo-card {
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-left: 4px solid var(--slds-g-color-accent-1, #066afe);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    box-shadow: var(--slds-g-shadow-1, 0 1px 2px rgba(0, 0, 0, 0.08));
+    padding: var(--slds-g-spacing-4, 1rem);
+}
+
+.c-nbo-card_header {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    margin-bottom: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.c-nbo-card_badge {
+    background: var(--slds-g-color-accent-1, #066afe);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    text-transform: uppercase;
+}
+
+.c-nbo-card_produto {
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.c-nbo-card_titulo {
+    font-size: var(--slds-g-font-scale-3, 1.125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    margin: 0 0 var(--slds-g-spacing-2, 0.5rem) 0;
+}
+
+.c-nbo-card_narrativa {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+    line-height: 1.5;
+}
+
+.c-nbo-card_bloco {
+    background: var(--slds-g-color-surface-2, #f3f3f3);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: var(--slds-g-spacing-3, 0.75rem);
+}
+
+.c-nbo-card_rotulo {
+    font-size: 0.75rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.c-nbo-card_valor {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.c-nbo-card_valor--destaque {
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-success-1, #056764);
+}
+
+.c-nbo-card_flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: 2px 8px;
+    margin: 2px 4px 2px 0;
+    font-size: 0.75rem;
+}
+
+.c-nbo-card_beneficios {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.c-nbo-card_beneficios li {
+    background: var(--slds-g-color-surface-2, #f3f3f3);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: 4px 10px;
+    font-size: 0.8125rem;
+}

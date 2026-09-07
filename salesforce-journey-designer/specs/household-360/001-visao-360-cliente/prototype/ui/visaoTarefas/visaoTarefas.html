@@ -1,0 +1,24 @@
+<template>
+    <!-- Próximos passos — tarefas com baixa local (mock). Entrada: @api tarefas. Sem eventos. -->
+    <lightning-card title="Próximos passos" icon-name="standard:task">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={temTarefas}>
+                <template for:each={tarefasEstado} for:item="tarefa">
+                    <div key={tarefa.id} class="c-tarefas_item">
+                        <lightning-input
+                            type="checkbox"
+                            label={tarefa.titulo}
+                            checked={tarefa.concluida}
+                            data-id={tarefa.id}
+                            onchange={aoAlternarTarefa}>
+                        </lightning-input>
+                        <p class="c-tarefas_item-meta">{tarefa.prazo} • {tarefa.responsavel}</p>
+                    </div>
+                </template>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-body_small">Sem próximos passos para esta raiz.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

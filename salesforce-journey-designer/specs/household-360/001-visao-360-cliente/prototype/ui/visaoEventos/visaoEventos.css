@@ -1,0 +1,86 @@
+/* Eventos da vida — padrão do console (tile azul + glifo branco) */
+.c-eventos-barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+}
+
+.c-eventos-ordem {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+}
+
+.c-eventos-trilha {
+    position: relative;
+    display: flex;
+    gap: var(--slds-g-spacing-4, 1rem);
+    overflow-x: auto;
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-1, 4px);
+}
+
+.c-eventos-trilha::before {
+    content: '';
+    position: absolute;
+    top: 40px;
+    left: var(--slds-g-spacing-5, 1.5rem);
+    right: var(--slds-g-spacing-5, 1.5rem);
+    height: 2px;
+    background: #cfe3fd;
+}
+
+.c-eventos_no {
+    position: relative;
+    flex: 1 0 104px;
+    max-width: 150px;
+    text-align: center;
+}
+
+.c-eventos_no-tile {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    background: #066afe;
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+}
+
+.c-eventos_no-tile svg {
+    width: 28px;
+    height: 28px;
+}
+
+.c-eventos_no-check {
+    position: absolute;
+    left: 50%;
+    bottom: -9px;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 18px;
+    background: #066afe;
+    border: 2px solid var(--slds-g-color-surface-1, #ffffff);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+}
+
+.c-eventos_no-titulo {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    margin-top: 12px;
+}
+
+.c-eventos_no-data {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+}

@@ -1,0 +1,27 @@
+<template>
+    <lightning-modal-header label="Selecionar via de cartão"></lightning-modal-header>
+    <lightning-modal-body>
+        <p class="slds-m-bottom_small slds-text-body_small" style="color:#5c5c5c">Escolha a via que motivou o contato — ativas, canceladas e bloqueadas estão listadas como cartões reais.</p>
+        <div class="slds-grid slds-wrap slds-gutters">
+            <template for:each={vias} for:item="via">
+                <div key={via.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_small">
+                    <button type="button" class="c-via-card" style={via.estiloCartao} data-id={via.id} onclick={aoEscolherVia} aria-label={via.ariaLabel}>
+                        <div class="c-via-card_top">
+                            <span class="c-via-card_bandeira" style={via.estiloLogo}>{via.logoBandeira}</span>
+                            <lightning-badge label={via.situacao}></lightning-badge>
+                        </div>
+                        <div class="c-via-card_final" style={via.estiloTexto}>•••• {via.final}</div>
+                        <div class="c-via-card_portador" style={via.estiloTexto}>{via.portador} ({via.titularidade}) • {via.categoria}</div>
+                        <div class="c-via-card_rodape" style={via.estiloTexto}>
+                            <span>{via.bandeira} {via.categoria}</span>
+                            <span>{via.limite} • {via.anuidade}</span>
+                        </div>
+                    </button>
+                </div>
+            </template>
+        </div>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="Cancelar" variant="neutral" onclick={aoCancelar}></lightning-button>
+    </lightning-modal-footer>
+</template>

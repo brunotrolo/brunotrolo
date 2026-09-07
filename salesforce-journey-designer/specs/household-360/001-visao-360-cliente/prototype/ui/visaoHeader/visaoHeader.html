@@ -1,0 +1,97 @@
+<template>
+    <!-- P1/P2 — destaques em 3 colunas no padrão do console (tipo + nome +
+         selos | autenticação | resumo do perfil | responsável/necessidades).
+         Somente leitura via @api cliente. Sem eventos. -->
+    <div class="c-cabecalho" aria-live="polite">
+        <div class="slds-grid slds-wrap slds-gutters">
+            <!-- Coluna 1 — tipo, nome, selos + autenticação -->
+            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+                <p class="slds-text-title">{cliente.tipoPessoa}</p>
+                <h1 class="c-cabecalho_nome">{cliente.nome}</h1>
+                <p class="slds-m-top_xx-small">
+                    <span class="c-selo c-selo_ouro">{cliente.segmento}</span>
+                    <span class="c-selo c-selo_verde">{cliente.status}</span>
+                </p>
+                <h2 class="c-cabecalho_secao">Autenticação</h2>
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-2">
+                        <p class="slds-text-title">Telefone</p>
+                        <p class="slds-text-body_regular">{cliente.telefone}</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <p class="slds-text-title">E-mail</p>
+                        <p class="slds-text-body_regular">{cliente.email}</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                        <p class="slds-text-title">Endereço</p>
+                        <p class="slds-text-body_regular">{cliente.perfil.endereco}</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                        <p class="slds-text-title">Agência / Conta</p>
+                        <p class="slds-text-body_regular">{cliente.perfil.agenciaConta}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna 2 — resumo do perfil -->
+            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+                <h2 class="c-cabecalho_secao c-cabecalho_secao-fantasma" aria-hidden="true">&nbsp;</h2>
+                <h2 class="c-cabecalho_secao">Resumo do perfil</h2>
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-2">
+                        <p class="slds-text-title">Cliente desde</p>
+                        <p class="slds-text-body_regular"><strong>{cliente.clienteDesde}</strong></p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <p class="slds-text-title">Segmento</p>
+                        <p class="slds-text-body_regular">{cliente.segmento}</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                        <p class="slds-text-title">Estado civil</p>
+                        <p class="slds-text-body_regular"><strong>{cliente.estadoCivil}</strong></p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                        <p class="slds-text-title">Rating</p>
+                        <p class="slds-text-body_regular"><strong class="c-verde">{cliente.rating}</strong></p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                        <p class="slds-text-title">Filhos</p>
+                        <p class="slds-text-body_regular"><strong>{cliente.filhos}</strong></p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-m-top_x-small">
+                        <p class="slds-text-title">Cadastro completo</p>
+                        <p class="slds-text-body_regular"><strong class="c-verde">{completude}</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna 3 — responsável + necessidades -->
+            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+                <p class="slds-text-title">Responsável</p>
+                <p class="c-cabecalho_resp">
+                    <span class="c-avatar" aria-hidden="true">{iniciaisResponsavel}</span>
+                    <span class="c-cabecalho_resp-nome">{cliente.responsavel}</span>
+                </p>
+                <h2 class="c-cabecalho_secao">Necessidades</h2>
+                <p class="slds-text-title">Segmento</p>
+                <p class="c-cabecalho_linha">
+                    <lightning-icon icon-name={cliente.necessidade.icone} size="x-small" alternative-text=""></lightning-icon>
+                    <strong>{cliente.necessidade.rotulo}</strong>
+                </p>
+                <p class="slds-text-title slds-m-top_x-small">Etapa da jornada</p>
+                <p class="c-cabecalho_linha">
+                    <lightning-icon icon-name={cliente.jornada.icone} size="x-small" alternative-text=""></lightning-icon>
+                    <strong>{cliente.jornada.rotulo}</strong>
+                </p>
+                <template lwc:if={temCanais}>
+                    <p class="slds-text-title slds-m-top_x-small">Canais preferidos</p>
+                    <p class="c-cabecalho_linha" role="group" aria-label="Canais preferidos">
+                        <template for:each={cliente.canais} for:item="canal">
+                            <lightning-icon key={canal.rotulo} icon-name={canal.icone} size="small" alternative-text={canal.rotulo} title={canal.rotulo}></lightning-icon>
+                        </template>
+                    </p>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>

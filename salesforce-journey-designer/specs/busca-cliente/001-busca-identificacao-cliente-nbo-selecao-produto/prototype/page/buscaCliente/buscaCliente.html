@@ -1,0 +1,95 @@
+<template>
+    <!-- Shell orquestrador — dono do estado da jornada, não de UI de domínio.
+         Filhos independentes (1 arquivo = 1 responsabilidade):
+         search-bar → buscar | nbo-banner → abordar/dispensar |
+         header-summary | product-hub → productselect | holding-strip.
+         Ajustar um filho nunca exige tocar em outro nem neste shell. -->
+
+    <ui-busca-cliente-search-bar onbuscar={aoBuscarSolicitada}></ui-busca-cliente-search-bar>
+
+    <!-- P9 — carregamento -->
+    <template lwc:if={mostrarCarregamento}>
+        <lightning-card title="Localizando cliente…" icon-name="standard:search" class="slds-m-top_small">
+            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                <lightning-spinner alternative-text="Carregando dados do cliente" size="small"></lightning-spinner>
+                <template lwc:if={carregandoCadastro}>
+                    <div class="c-skeleton-bar c-skeleton-bar_titulo slds-size_3-of-5" aria-hidden="true"></div>
+                    <div class="c-skeleton-bar" aria-hidden="true"></div>
+                </template>
+                <template lwc:if={carregandoHub}>
+                    <div class="c-skeleton-bar" aria-hidden="true"></div>
+                    <div class="c-skeleton-bar slds-size_2-of-5" aria-hidden="true"></div>
+                </template>
+                <template lwc:if={carregandoNbo}>
+                    <div class="c-skeleton-bar slds-size_2-of-5" aria-hidden="true"></div>
+                </template>
+                <p class="slds-text-body_small slds-m-top_x-small">Buscando cadastro, produtos e ofertas em paralelo…</p>
+            </div>
+        </lightning-card>
+    </template>
+
+    <template lwc:if={mostrarNaoEncontrado}>
+        <lightning-card title="Nenhum cadastro localizado" icon-name="standard:search" class="slds-m-top_small">
+            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                <p>Nenhum cadastro foi localizado para o documento informado. Confira os dígitos e tente novamente.</p>
+                <lightning-button label="Nova busca" variant="neutral" onclick={aoLimpar} class="slds-m-top_small"></lightning-button>
+            </div>
+        </lightning-card>
+    </template>
+
+    <template lwc:if={mostrarErroTotal}>
+        <lightning-card title="Fontes indisponíveis" icon-name="utility:warning" class="slds-m-top_small">
+            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                <p>As fontes corporativas estão temporariamente indisponíveis. O documento digitado foi preservado — tente novamente em instantes.</p>
+                <lightning-button label="Tentar novamente" variant="brand" onclick={aoTentarNovamente} class="slds-m-top_small"></lightning-button>
+            </div>
+        </lightning-card>
+    </template>
+
+    <!-- Resultado — composição dos filhos -->
+    <template lwc:if={mostrarResultado}>
+        <ui-busca-cliente-header-summary
+            cliente={cliente}
+            icone-tipo-pessoa={iconeTipoPessoa}>
+        </ui-busca-cliente-header-summary>
+
+        <ui-busca-cliente-nbo-banner
+            oferta-ativa={ofertaAtiva}
+            mostrar-oferta-em-abordagem={mostrarOfertaEmAbordagem}
+            mostrar-oferta-dispensada={mostrarOfertaDispensada}
+            mostrar-aviso-ofertas-indisponiveis={mostrarAvisoOfertasIndisponiveis}
+            onabordar={aoAbordarOferta}
+            ondispensar={aoDispensarOferta}>
+        </ui-busca-cliente-nbo-banner>
+
+        <!-- Gate: Produtos só após decisão da oportunidade -->
+        <template lwc:if={mostrarGateProdutos}>
+            <div class="slds-m-top_small slds-p-around_medium c-gate">
+                <lightning-icon icon-name="utility:lock" size="x-small" alternative-text="Bloqueado"></lightning-icon>
+                <span class="slds-m-left_x-small">Selecione <strong>Abordar venda</strong> ou <strong>Dispensar</strong> na oportunidade acima para liberar os produtos.</span>
+            </div>
+        </template>
+
+        <template lwc:if={mostrarHub}>
+            <ui-busca-cliente-product-hub
+                produtos={cliente.produtos}
+                onproductselect={aoProdutoSelecionado}>
+            </ui-busca-cliente-product-hub>
+        </template>
+
+        <template lwc:if={temHolding}>
+            <ui-busca-cliente-holding-strip holding={cliente.holding}></ui-busca-cliente-holding-strip>
+        </template>
+
+        <!-- Contexto fixado -->
+        <template lwc:if={contextoFixado}>
+            <lightning-card title="Contexto de atendimento fixado" icon-name="standard:contact" class="slds-m-top_small">
+                <div class="slds-p-horizontal_medium slds-p-bottom_medium" aria-live="polite">
+                    <p><strong>Cliente:</strong> {cliente.nome} • <strong>Produto:</strong> {contextoFixado.produtoNome}<span lwc:if={contextoFixado.via}> • <strong>Via:</strong> {contextoFixado.via.bandeira} {contextoFixado.via.categoria} final {contextoFixado.via.final} ({contextoFixado.via.titularidade})</span><span lwc:if={contextoFixado.cota}> • <strong>Cota:</strong> {contextoFixado.cota.tipo} Grupo {contextoFixado.cota.grupo}/Cota {contextoFixado.cota.cota} — {contextoFixado.cota.valor} ({contextoFixado.cota.status})</span><span lwc:if={contextoFixado.investimento}> • <strong>Posição:</strong> {contextoFixado.investimento.classe} {contextoFixado.investimento.produto} — {contextoFixado.investimento.valor} ({contextoFixado.investimento.rentabilidade})</span></p>
+                    <p class="slds-text-body_small slds-m-top_x-small">Identificação encerrada — pronto para a próxima etapa do atendimento.</p>
+                    <lightning-button label="Nova busca (F2)" variant="neutral" onclick={aoLimpar} class="slds-m-top_small"></lightning-button>
+                </div>
+            </lightning-card>
+        </template>
+    </template>
+</template>

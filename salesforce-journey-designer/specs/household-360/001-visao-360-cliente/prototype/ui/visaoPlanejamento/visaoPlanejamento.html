@@ -1,0 +1,34 @@
+<template>
+    <!-- Planejamento financeiro — régua de maturidade + recomendação (mock).
+         Entrada: @api planejamento {nivel, etapa, recomendacao, recomendacaoDetalhe}. Sem eventos. -->
+    <lightning-card>
+        <span slot="title" class="c-plan_titulo">
+            Planejamento financeiro:&nbsp;<strong>{planejamento.nivel}</strong>
+        </span>
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={planejamento}>
+                <div class="c-plan_regua" role="img" aria-label="Maturidade: {planejamento.nivel}">
+                    <template for:each={etapas} for:item="etapa">
+                        <div key={etapa.indice} class={etapa.classe} title={etapa.rotulo}></div>
+                    </template>
+                    <span class="c-plan_marcador" style={estiloMarcador} aria-hidden="true">
+                        <lightning-icon icon-name="utility:success" size="xx-small" alternative-text=""></lightning-icon>
+                    </span>
+                    <span class="c-plan_estrela" aria-hidden="true">★</span>
+                </div>
+                <div class="c-plan_recomendacao slds-m-top_small">
+                    <span class="c-plan_recomendacao-icone" aria-hidden="true">
+                        <lightning-icon icon-name="utility:list" size="x-small" variant="inverse" alternative-text=""></lightning-icon>
+                    </span>
+                    <div>
+                        <div class="c-plan_recomendacao-titulo">{planejamento.recomendacao}</div>
+                        <div class="slds-text-body_small">{planejamento.recomendacaoDetalhe}</div>
+                    </div>
+                </div>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-body_small">Sem planejamento para esta raiz.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

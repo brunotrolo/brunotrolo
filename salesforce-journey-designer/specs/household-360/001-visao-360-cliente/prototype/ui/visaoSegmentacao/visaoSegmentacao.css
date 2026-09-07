@@ -1,0 +1,69 @@
+/* Gastos por segmentação — pizza (slds-card com altura cheia) */
+:host {
+    display: block;
+    height: 100%;
+}
+
+.c-chart {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.c-chart .slds-card__body {
+    flex: 1;
+}
+
+.c-seg_corpo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-5, 1.5rem);
+}
+
+.c-seg_pizza-col {
+    flex: 0 1 220px;
+    min-width: 180px;
+    margin: 0 auto;
+}
+
+.c-seg_pizza {
+    width: 100%;
+    display: block;
+}
+
+.c-seg_pct {
+    font-size: 6.5px;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    fill: #ffffff;
+}
+
+.c-seg_legenda {
+    flex: 1 1 220px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.c-seg_legenda-item {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    padding: 2px 0;
+}
+
+.c-seg_cor {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+}
+
+.c-seg_periodo {
+    text-align: center;
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+    margin: 2px 0 0 0;
+}

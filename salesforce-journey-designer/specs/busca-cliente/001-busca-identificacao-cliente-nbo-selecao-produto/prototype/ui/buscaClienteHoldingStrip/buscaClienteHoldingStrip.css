@@ -1,0 +1,27 @@
+/* Holding com iconografia */
+.c-holding-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    background: var(--slds-g-color-surface-2, #f3f3f3);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: var(--slds-g-spacing-3, 0.75rem);
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+}
+
+.c-holding-card_text {
+    display: flex;
+    flex-direction: column;
+}
+
+.c-holding-card_badge {
+    font-size: 0.6875rem;
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border-radius: 999px;
+    padding: 1px 6px;
+    margin-top: 4px;
+    align-self: flex-start;
+}

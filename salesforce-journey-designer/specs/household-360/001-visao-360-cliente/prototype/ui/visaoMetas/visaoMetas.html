@@ -1,0 +1,60 @@
+<template>
+    <!-- Aba Financial Goals — cartões de objetivo no padrão do console
+         (título sublinhado + estado + chevron funcional + donut de progresso).
+         Entrada: @api metas. Somente leitura, sem eventos. -->
+    <template lwc:if={temMetas}>
+        <template for:each={metasEstado} for:item="meta">
+            <div key={meta.id} class="slds-m-bottom_small">
+            <lightning-card>
+                <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                    <div class="c-meta_topo">
+                        <span class="c-meta_nome">{meta.nome}</span>
+                        <lightning-badge label={meta.estado}></lightning-badge>
+                        <button
+                            type="button"
+                            class="c-meta_chevron"
+                            data-id={meta.id}
+                            title="Recolher/expandir meta"
+                            aria-expanded={meta.expandida}
+                            onclick={aoAlternarMeta}>
+                            <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Recolher/expandir"></lightning-icon>
+                        </button>
+                    </div>
+                    <template lwc:if={meta.expandida}>
+                        <div class="c-meta_corpo">
+                            <div class="c-meta_dados">
+                                <div class="c-meta_rotulo">{meta.nome}</div>
+                                <div class="slds-grid slds-wrap slds-gutters">
+                                    <div class="slds-col slds-size_1-of-3">
+                                        <div class="slds-text-title">Valor alvo</div>
+                                        <div class="slds-text-body_regular"><strong class="c-meta_valor">{meta.alvo}</strong></div>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3">
+                                        <div class="slds-text-title">Valor atual</div>
+                                        <div class="slds-text-body_regular"><strong class="c-meta_valor">{meta.atual}</strong></div>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3">
+                                        <div class="slds-text-title">Data-alvo</div>
+                                        <div class="slds-text-body_regular"><strong class="c-meta_valor">{meta.dataAlvo}</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="c-meta_donut" role="img" aria-label={meta.rotuloDonut}>
+                                <svg viewBox="0 0 84 84" aria-hidden="true">
+                                    <circle cx="42" cy="42" r="34" fill="none" stroke="#e5e5e5" stroke-width="10"></circle>
+                                    <circle cx="42" cy="42" r="34" fill="none" stroke="#1f9e6e" stroke-width="10"
+                                        stroke-linecap="round" stroke-dasharray={meta.traco} transform="rotate(-90 42 42)"></circle>
+                                </svg>
+                                <span class="c-meta_pct">{meta.percentual}%</span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </lightning-card>
+            </div>
+        </template>
+    </template>
+    <template lwc:else>
+        <p class="slds-text-body_small slds-p-around_medium">Sem metas cadastradas para esta raiz.</p>
+    </template>
+</template>

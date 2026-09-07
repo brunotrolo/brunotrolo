@@ -1,0 +1,125 @@
+<template>
+    <!-- Aba Inteligência — fluxo, segmentação, comportamento digital e campanhas.
+         Somente leitura via @api. Sem eventos. (O Atendimento saiu da aba; os
+         dados seguem no Histórico da aba Atividades.) -->
+    <div class="slds-grid slds-wrap slds-gutters slds-grid_vertical-stretch slds-m-bottom_small">
+        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2 c-grafico-col">
+            <ui-visao-fluxo fluxo={fluxo}></ui-visao-fluxo>
+        </div>
+        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2 c-grafico-col">
+            <ui-visao-segmentacao segmentacao={segmentacao}></ui-visao-segmentacao>
+        </div>
+    </div>
+
+    <!-- Comportamento digital — accordion SLDS + sub-abas + tabela -->
+    <lightning-accordion
+        active-section-name={secoesAbertasLista}
+        onsectiontoggle={aoAlternarSecao}
+        class="slds-m-bottom_small">
+        <lightning-accordion-section name="comportamento" label="Comportamento digital">
+            <template lwc:if={temComportamento}>
+                <!-- Sub-abas Site / Aplicativo -->
+                <div class="c-subabas" role="tablist" aria-label="Canal de acesso">
+                    <template for:each={filtrosCanal} for:item="filtro">
+                        <button
+                            key={filtro.id}
+                            type="button"
+                            role="tab"
+                            class={filtro.classe}
+                            data-id={filtro.id}
+                            aria-selected={filtro.ativo}
+                            onclick={aoFiltrarCanal}>
+                            {filtro.rotulo}
+                        </button>
+                    </template>
+                </div>
+                <div class="c-tabela-rolavel">
+                    <table class="slds-table slds-table_cell-buffer" aria-label="Acessos digitais">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th scope="col"><div class="slds-truncate">Data e hora ↓</div></th>
+                                <th scope="col"><div class="slds-truncate">Duração</div></th>
+                                <th scope="col"><div class="slds-truncate">Páginas</div></th>
+                                <th scope="col"><div class="slds-truncate">Origem</div></th>
+                                <th scope="col"><div class="slds-truncate"></div></th>
+                            </tr>
+                        </thead>
+                        <template for:each={acessosVisiveis} for:item="acesso">
+                            <tbody key={acesso.quando}>
+                                <tr class="slds-hint-parent">
+                                    <td><div class="slds-truncate">{acesso.quando}</div></td>
+                                    <td><div class="slds-truncate">{acesso.duracao}</div></td>
+                                    <td><div class="slds-truncate">{acesso.paginas} ▾</div></td>
+                                    <td><div class="slds-truncate">{acesso.origem}</div></td>
+                                    <td>
+                                        <lightning-button-icon
+                                            icon-name="utility:chevrondown"
+                                            alternative-text="Detalhar acesso"
+                                            title="Detalhar acesso"
+                                            data-id={acesso.quando}
+                                            onclick={aoAlternarAcesso}>
+                                        </lightning-button-icon>
+                                    </td>
+                                </tr>
+                                <template lwc:if={acesso.expandido}>
+                                    <tr class="c-linha-detalhe">
+                                        <td colspan="5">
+                                            <p class="slds-text-body_small">{acesso.detalhe}</p>
+                                            <p class="slds-text-body_small">Dispositivo: {acesso.dispositivo} • {acesso.destaque}</p>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </template>
+                    </table>
+                </div>
+                <template lwc:if={temMaisAcessos}>
+                    <button type="button" class="c-ver-tudo" onclick={aoVerMaisAcessos}>
+                        + Ver tudo
+                    </button>
+                </template>
+                <template lwc:if={paginadoAcessos}>
+                    <button type="button" class="c-ver-tudo" onclick={aoVerMenosAcessos}>
+                        − Ver menos
+                    </button>
+                </template>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-body_small">Sem dados de comportamento digital para esta raiz.</p>
+            </template>
+        </lightning-accordion-section>
+
+        <!-- Reação a campanhas — mesma accordion, inicia recolhida -->
+        <lightning-accordion-section name="campanhas" label="Reação a campanhas">
+            <template lwc:if={temCampanhas}>
+                <div class="c-tabela-rolavel">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-label="Reação a campanhas de marketing">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col"><div class="slds-truncate">Início</div></th>
+                            <th scope="col"><div class="slds-truncate">Campanha</div></th>
+                            <th scope="col"><div class="slds-truncate">1º objetivo</div></th>
+                            <th scope="col"><div class="slds-truncate">Objetivo final</div></th>
+                            <th scope="col"><div class="slds-truncate">Oportunidade</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={campanhasApresentacao} for:item="campanha">
+                            <tr key={campanha.id} class="slds-hint-parent">
+                                <td><div class="slds-truncate">{campanha.inicio}</div></td>
+                                <td><div class="slds-truncate">{campanha.nome}</div></td>
+                                <td><lightning-icon icon-name={campanha.iconePrimeira} size="x-small" alternative-text={campanha.primeira}></lightning-icon></td>
+                                <td><lightning-icon icon-name={campanha.iconeFinal} size="x-small" alternative-text={campanha.final}></lightning-icon></td>
+                                <td><lightning-icon icon-name={campanha.iconeOportunidade} size="x-small" alternative-text={campanha.oportunidade}></lightning-icon></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                </div>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-body_small">Sem campanhas vinculadas a esta raiz.</p>
+            </template>
+        </lightning-accordion-section>
+    </lightning-accordion>
+</template>

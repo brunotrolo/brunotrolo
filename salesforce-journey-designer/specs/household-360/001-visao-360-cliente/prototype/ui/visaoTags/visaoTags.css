@@ -1,0 +1,50 @@
+/* Tags de interesse — estilo do console Wealth */
+.c-tags_titulo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+.c-tags_titulo-icone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: #4bc076;
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+}
+
+.c-tags_busca {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.c-tags_busca-cat {
+    flex: 1 1 130px;
+    min-width: 0;
+}
+
+.c-tags_busca-texto {
+    flex: 2 1 160px;
+    min-width: 0;
+}
+
+.c-tags_grupo {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    margin-bottom: 4px;
+}
+
+.c-tags_pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}

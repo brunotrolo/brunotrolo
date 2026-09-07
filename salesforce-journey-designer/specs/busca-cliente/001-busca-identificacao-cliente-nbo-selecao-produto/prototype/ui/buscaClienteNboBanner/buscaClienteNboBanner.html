@@ -1,0 +1,83 @@
+<template>
+    <!-- P6 — Oportunidade Black narrativa.
+         Independente: recebe a oferta via @api, emite `abordar`/`dispensar`.
+         Nunca toca em busca, hub ou modais. -->
+    <template lwc:if={temOfertaIdentificada}>
+        <div class="slds-m-top_small c-nbo-card" role="status">
+            <div class="c-nbo-card_header">
+                <lightning-icon icon-name="standard:opportunity" size="small" alternative-text="Oportunidade"></lightning-icon>
+                <span class="c-nbo-card_badge">Oportunidade identificada</span>
+                <span class="c-nbo-card_produto">{ofertaAtiva.produto}</span>
+            </div>
+            <h3 class="c-nbo-card_titulo">{ofertaAtiva.titulo}</h3>
+            <p class="c-nbo-card_narrativa">{ofertaAtiva.narrativa}</p>
+            <div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+                    <div class="c-nbo-card_bloco">
+                        <div class="c-nbo-card_rotulo">Bandeiras disponíveis</div>
+                        <template for:each={ofertaAtiva.bandeiras} for:item="b">
+                            <span key={b.nome} class="c-nbo-card_flag">
+                                <lightning-icon icon-name={b.logo} size="x-small" alternative-text={b.nome}></lightning-icon>
+                                {b.nome}
+                            </span>
+                        </template>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+                    <div class="c-nbo-card_bloco">
+                        <div class="c-nbo-card_rotulo">Limite pré-aprovado</div>
+                        <div class="c-nbo-card_valor">{ofertaAtiva.limites}</div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+                    <div class="c-nbo-card_bloco">
+                        <div class="c-nbo-card_rotulo">Anuidade</div>
+                        <div class="c-nbo-card_valor c-nbo-card_valor--destaque">{ofertaAtiva.anuidade}</div>
+                    </div>
+                </div>
+            </div>
+            <ul class="c-nbo-card_beneficios slds-m-top_small">
+                <template for:each={ofertaAtiva.beneficios} for:item="ben">
+                    <li key={ben}>✓ {ben}</li>
+                </template>
+            </ul>
+            <div class="slds-m-top_medium">
+                <lightning-button label="Abordar venda" variant="brand" onclick={aoAbordar} class="slds-m-right_x-small"></lightning-button>
+                <lightning-button label="Dispensar" variant="neutral" onclick={aoDispensar}></lightning-button>
+            </div>
+        </div>
+    </template>
+
+    <template lwc:if={mostrarOfertaEmAbordagem}>
+        <div class="slds-scoped-notification slds-media slds-media_center slds-scoped-notification_light slds-m-top_small" role="status">
+            <div class="slds-media__figure">
+                <lightning-icon icon-name="standard:opportunity" size="small" alternative-text="Em abordagem"></lightning-icon>
+            </div>
+            <div class="slds-media__body">
+                <p><strong>Em abordagem:</strong> {ofertaAtiva.produto} — contexto preservado. Selecione o produto motivador do contato abaixo.</p>
+            </div>
+        </div>
+    </template>
+
+    <template lwc:if={mostrarOfertaDispensada}>
+        <div class="slds-scoped-notification slds-media slds-media_center slds-scoped-notification_light slds-m-top_small" role="status">
+            <div class="slds-media__figure">
+                <lightning-icon icon-name="utility:check" size="small" alternative-text="Dispensada"></lightning-icon>
+            </div>
+            <div class="slds-media__body">
+                <p>Oportunidade dispensada — você pode seguir para a seleção do produto.</p>
+            </div>
+        </div>
+    </template>
+
+    <template lwc:if={mostrarAvisoOfertasIndisponiveis}>
+        <div class="slds-scoped-notification slds-media slds-media_center slds-scoped-notification_light slds-m-top_small" role="status">
+            <div class="slds-media__figure">
+                <lightning-icon icon-name="utility:warning" size="small" alternative-text="Ofertas indisponíveis"></lightning-icon>
+            </div>
+            <div class="slds-media__body">
+                <p>Ofertas indisponíveis no momento. É possível seguir com a seleção do produto.</p>
+            </div>
+        </div>
+    </template>
+</template>

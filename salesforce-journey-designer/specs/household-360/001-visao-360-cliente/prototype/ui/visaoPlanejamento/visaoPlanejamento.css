@@ -1,0 +1,90 @@
+/* Planejamento financeiro — régua + recomendação */
+.c-plan_titulo {
+    font-weight: var(--slds-g-font-weight-4, 400);
+}
+
+.c-plan_titulo strong {
+    font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+.c-plan_regua {
+    position: relative;
+    display: flex;
+    gap: 3px;
+}
+
+.c-plan_etapa {
+    flex: 1;
+    height: 14px;
+    border-radius: 3px;
+}
+
+.c-plan_etapa_0 {
+    background: #7b5ff0;
+}
+
+.c-plan_etapa_1 {
+    background: #2f80ed;
+}
+
+.c-plan_etapa_2 {
+    background: #0eb9c8;
+}
+
+.c-plan_etapa_3 {
+    background: #1f9e6e;
+}
+
+.c-plan_etapa_4 {
+    background: var(--slds-g-color-surface-2, #e5e5e5);
+}
+
+.c-plan_marcador {
+    position: absolute;
+    top: -5px;
+    width: 22px;
+    height: 22px;
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+}
+
+.c-plan_estrela {
+    position: absolute;
+    top: -7px;
+    right: 2%;
+    color: var(--slds-g-color-border-1, #c9c9c9);
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.c-plan_recomendacao {
+    display: flex;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    align-items: flex-start;
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+}
+
+.c-plan_recomendacao-icone {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: #1f9e6e;
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+}
+
+.c-plan_recomendacao-titulo {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}

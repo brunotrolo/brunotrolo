@@ -1,0 +1,52 @@
+.c-via-card {
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    padding: var(--slds-g-spacing-4, 1rem);
+    cursor: pointer;
+    background: var(--slds-g-color-surface-1, #ffffff);
+    box-shadow: var(--slds-g-shadow-1, 0 1px 2px rgba(0, 0, 0, 0.08));
+    width: 100%;
+    text-align: left;
+}
+
+.c-via-card:hover {
+    box-shadow: var(--slds-g-shadow-2, 0 2px 8px rgba(0, 0, 0, 0.12));
+}
+
+.c-via-card:focus-visible {
+    outline: var(--slds-g-sizing-border-2, 2px) solid var(--slds-g-color-accent-1, #066afe);
+    outline-offset: 2px;
+}
+
+.c-via-card_top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.c-via-card_bandeira {
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.04em;
+    font-size: var(--slds-g-font-scale-base, 0.8125rem);
+}
+
+.c-via-card_final {
+    font-size: var(--slds-g-font-scale-2, 1rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    letter-spacing: 0.06em;
+    margin-top: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.c-via-card_portador {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    opacity: 0.9;
+    margin-top: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.c-via-card_rodape {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--slds-g-spacing-3, 0.75rem);
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    opacity: 0.9;
+}

@@ -1,0 +1,85 @@
+/* Linha do tempo — grade responsiva, filtros, expansão, paginação */
+.c-timeline-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--slds-g-spacing-1, 4px);
+    margin-bottom: var(--slds-g-spacing-3, 0.75rem);
+}
+
+.c-timeline-filtro {
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: 999px;
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    padding: 4px var(--slds-g-spacing-3, 0.75rem);
+    cursor: pointer;
+}
+
+.c-timeline-filtro_ativo {
+    background: var(--slds-g-color-accent-1, #066afe);
+    border-color: var(--slds-g-color-accent-1, #066afe);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+.c-timeline-grade {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+}
+
+@media (min-width: 1024px) {
+    .c-timeline-grade {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.c-timeline-cartao {
+    background: var(--slds-g-color-surface-2, #f3f3f3);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: var(--slds-g-spacing-3, 0.75rem);
+}
+
+.c-timeline-cartao_topo {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    margin-bottom: 4px;
+}
+
+.c-timeline-cartao_quando {
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.c-timeline-detalhes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    margin: var(--slds-g-spacing-2, 0.5rem) 0 0 0;
+}
+
+.c-timeline-detalhes dd {
+    margin: 0;
+}
+
+.c-timeline-vermais {
+    background: transparent;
+    border: none;
+    padding: 4px 0 0 0;
+    color: var(--slds-g-color-accent-1, #066afe);
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    cursor: pointer;
+}
+
+.c-timeline-rodape {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: var(--slds-g-spacing-3, 0.75rem);
+    padding-top: var(--slds-g-spacing-2, 0.5rem);
+    border-top: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    font-weight: var(--slds-g-font-weight-7, 700);
+}

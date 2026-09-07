@@ -1,0 +1,50 @@
+<template>
+    <!-- Fluxo de entrada e saída — barras mensais em SVG próprio (mock).
+         Card em blueprint slds-card para altura igual à irmã.
+         Entrada: @api fluxo {maximo, meses[]}. Sem eventos. -->
+    <article class="slds-card c-chart">
+        <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">Fluxo de entrada e saída</h2>
+                </div>
+                <div class="slds-no-flex">
+                    <lightning-button
+                        label="Ver relatório"
+                        variant="base"
+                        disabled
+                        title="Relatório é capacidade futura (fora do MVP)">
+                    </lightning-button>
+                </div>
+            </header>
+        </div>
+        <div class="slds-card__body slds-card__body_inner">
+            <template lwc:if={temFluxo}>
+                <div class="c-fluxo_svg">
+                <svg viewBox="0 0 640 210" role="img" aria-label="Entradas e saídas por mês">
+                    <template for:each={linhas} for:item="linha">
+                        <line key={linha.chaveGrade} x1="40" y1={linha.y} x2="620" y2={linha.y} class="c-fluxo_grade"></line>
+                        <text key={linha.chaveRotulo} x="36" y={linha.yTexto} text-anchor="end" class="c-fluxo_eixo">{linha.rotulo}</text>
+                    </template>
+                    <template for:each={barras} for:item="barra">
+                        <rect key={barra.idEntrada} x={barra.xEntrada} y={barra.yEntrada} width="16" height={barra.altEntrada} class="c-fluxo_entrada">
+                            <title>Entrada {barra.mes}: R$ {barra.entrada}</title>
+                        </rect>
+                        <rect key={barra.idSaida} x={barra.xSaida} y={barra.ySaida} width="16" height={barra.altSaida} class="c-fluxo_saida">
+                            <title>Saída {barra.mes}: R$ {barra.saida}</title>
+                        </rect>
+                        <text key={barra.mes} x={barra.xRotulo} y="192" text-anchor="middle" class="c-fluxo_eixo">{barra.mes}</text>
+                    </template>
+                </svg>
+                </div>
+                <div class="c-fluxo_legenda">
+                    <span class="c-fluxo_legenda-item"><span class="c-fluxo_cor c-fluxo_cor-entrada" aria-hidden="true"></span>Entradas</span>
+                    <span class="c-fluxo_legenda-item"><span class="c-fluxo_cor c-fluxo_cor-saida" aria-hidden="true"></span>Saídas</span>
+                </div>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-body_small">Sem dados de fluxo para esta raiz.</p>
+            </template>
+        </div>
+    </article>
+</template>

@@ -1,0 +1,59 @@
+/* Cartões de produto (P4) — selo funcional por situação + seleção.
+   Cor nunca sozinha: o texto do lightning-badge carrega o significado. */
+.c-ativo {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: var(--slds-g-spacing-3, 0.75rem);
+    margin-bottom: var(--slds-g-spacing-2, 0.5rem);
+    cursor: pointer;
+}
+
+.c-ativo_selecionado {
+    border-color: var(--slds-g-color-accent-1, #066afe);
+    box-shadow: var(--slds-g-shadow-1, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+.c-prod_topo {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.c-prod_titulos {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.c-prod_nome {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.c-prod_numero {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    color: var(--slds-g-color-accent-1, #066afe);
+}
+
+.c-prod_relatorio {
+    margin-left: auto;
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    color: var(--slds-g-color-accent-1, #066afe);
+    white-space: nowrap;
+}
+
+.c-prod_grade {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-4, 1rem);
+    margin: var(--slds-g-spacing-2, 0.5rem) 0 0 0;
+}
+
+.c-prod_grade dd {
+    margin: 0;
+}

@@ -1,0 +1,60 @@
+<template>
+    <!-- Gastos por segmentação — pizza em SVG próprio (mock).
+         Card em blueprint slds-card para altura igual à irmã.
+         Entrada: @api segmentacao {periodo, itens[]}. Sem eventos. -->
+    <article class="slds-card c-chart">
+        <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">Gastos por segmentação</h2>
+                </div>
+                <div class="slds-no-flex">
+                    <lightning-button
+                        label="Ver relatório"
+                        variant="base"
+                        disabled
+                        title="Relatório é capacidade futura (fora do MVP)">
+                    </lightning-button>
+                </div>
+            </header>
+        </div>
+        <div class="slds-card__body slds-card__body_inner">
+            <template lwc:if={temSegmentacao}>
+                <div class="c-seg_corpo">
+                    <div class="c-seg_pizza-col">
+                    <svg viewBox="0 0 100 100" class="c-seg_pizza" role="img" aria-label="Segmentação dos gastos no período">
+                        <template for:each={fatias} for:item="fatia">
+                            <path
+                                key={fatia.rotulo}
+                                d={fatia.caminho}
+                                fill={fatia.cor}>
+                                <title>{fatia.rotulo}: {fatia.textoPct}</title>
+                            </path>
+                        </template>
+                        <template for:each={rotulos} for:item="rotulo">
+                            <text
+                                key={rotulo.rotulo}
+                                x={rotulo.x} y={rotulo.y}
+                                text-anchor="middle"
+                                dominant-baseline="middle"
+                                class="c-seg_pct">{rotulo.textoPct}</text>
+                        </template>
+                    </svg>
+                    <p class="c-seg_periodo">{segmentacao.periodo}</p>
+                    </div>
+                    <ul class="c-seg_legenda">
+                        <template for:each={segmentacao.itens} for:item="item">
+                            <li key={item.rotulo} class="c-seg_legenda-item">
+                                <span class="c-seg_cor" style={item.estiloCor} aria-hidden="true"></span>
+                                {item.rotulo}
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-body_small">Sem dados de segmentação para esta raiz.</p>
+            </template>
+        </div>
+    </article>
+</template>

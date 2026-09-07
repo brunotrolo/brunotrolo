@@ -1,0 +1,28 @@
+<template>
+    <!-- Financial Accounts — faixa de totais no padrão do console (mock).
+         Entrada: @api resumo + @api total. Sem eventos. -->
+    <template lwc:if={resumo}>
+        <lightning-card title="Resumo">
+            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-4">
+                        <div class="c-cresumo_rotulo">Total em contas</div>
+                        <div class="c-cresumo_valor">{resumo.aum}</div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-4">
+                        <div class="c-cresumo_rotulo">Household</div>
+                        <div class="c-cresumo_valor">{resumo.patrimonioHousehold}</div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-4">
+                        <div class="c-cresumo_rotulo">Ativos fora da casa</div>
+                        <div class="c-cresumo_valor">{resumo.ativosFora}</div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-4">
+                        <div class="c-cresumo_rotulo">Produtos</div>
+                        <div class="c-cresumo_valor">{total}</div>
+                    </div>
+                </div>
+            </div>
+        </lightning-card>
+    </template>
+</template>

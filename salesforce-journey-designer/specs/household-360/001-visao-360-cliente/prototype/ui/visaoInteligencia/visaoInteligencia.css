@@ -1,0 +1,50 @@
+/* Aba Inteligência — accordion SLDS + sub-abas + tabelas */
+.c-tabela-rolavel {
+    overflow-x: auto;
+}
+
+.c-grafico-col {
+    display: flex;
+}
+
+.c-grafico-col ui-visao-fluxo,
+.c-grafico-col ui-visao-segmentacao {
+    flex: 1;
+    min-width: 0;
+}
+
+.c-subabas {
+    display: flex;
+    gap: var(--slds-g-spacing-4, 1rem);
+    border-bottom: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    padding: 0 var(--slds-g-spacing-3, 0.75rem);
+}
+
+.c-subaba {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: var(--slds-g-spacing-2, 0.5rem) 2px;
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+    cursor: pointer;
+}
+
+.c-subaba_ativa {
+    border-bottom-color: var(--slds-g-color-accent-1, #066afe);
+    color: var(--slds-g-color-accent-1, #066afe);
+    font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+.c-linha-detalhe td {
+    background: var(--slds-g-color-surface-2, #f3f3f3);
+}
+
+.c-ver-tudo {
+    background: transparent;
+    border: none;
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    color: var(--slds-g-color-accent-1, #066afe);
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    cursor: pointer;
+}

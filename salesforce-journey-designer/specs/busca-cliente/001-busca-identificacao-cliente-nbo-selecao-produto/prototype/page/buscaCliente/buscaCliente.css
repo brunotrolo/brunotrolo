@@ -1,0 +1,31 @@
+/* Shell — só gate + skeletons. Estilo de domínio mora em cada filho. */
+
+/* Gate */
+.c-gate {
+    background: var(--slds-g-color-surface-2, #f3f3f3);
+    border: var(--slds-g-sizing-border-1, 1px) dashed var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    display: flex;
+    align-items: center;
+}
+
+/* Skeletons */
+.c-skeleton-bar {
+    height: 0.875rem;
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    background: var(--slds-g-color-surface-2, #f3f3f3);
+    margin-top: var(--slds-g-spacing-2, 0.5rem);
+    animation: c-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+.c-skeleton-bar_titulo {
+    height: var(--slds-g-font-scale-2, 1rem);
+}
+
+@keyframes c-skeleton-pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.45; }
+    100% { opacity: 1; }
+}

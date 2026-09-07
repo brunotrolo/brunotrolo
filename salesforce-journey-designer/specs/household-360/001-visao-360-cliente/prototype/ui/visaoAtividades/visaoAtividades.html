@@ -1,0 +1,72 @@
+<template>
+    <!-- Linha do tempo — interações em grade responsiva, com filtro por tipo,
+         expansão "Ver mais" por item e paginação no rodapé.
+         Entrada: @api interacoes. Somente leitura, sem eventos. -->
+    <lightning-card title="Linha do tempo" icon-name="utility:list">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={temInteracoes}>
+                <!-- Filtro por tipo -->
+                <div class="c-timeline-filtros" role="group" aria-label="Filtrar por tipo">
+                    <template for:each={filtros} for:item="filtro">
+                        <button
+                            key={filtro.id}
+                            type="button"
+                            class={filtro.classe}
+                            data-id={filtro.id}
+                            aria-pressed={filtro.ativo}
+                            onclick={aoFiltrar}>
+                            {filtro.rotulo}
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Grade responsiva de cartões -->
+                <div class="c-timeline-grade">
+                    <template for:each={interacoesVisiveis} for:item="item">
+                        <div key={item.id} class="c-timeline-cartao">
+                            <div class="c-timeline-cartao_topo">
+                                <lightning-icon icon-name={item.icone} size="small" alternative-text={item.rotuloTipo}></lightning-icon>
+                                <span class="slds-text-title">{item.rotuloTipo}</span>
+                                <span class="c-timeline-cartao_quando slds-text-body_small">{item.quando} • {item.hora}</span>
+                            </div>
+                            <p class="slds-text-body_regular"><strong>{item.titulo}</strong></p>
+                            <p class="slds-text-body_small">{item.detalhe}</p>
+                            <template lwc:if={item.expandido}>
+                                <p class="slds-text-body_small slds-m-top_x-small">{item.detalheLongo}</p>
+                                <dl class="c-timeline-detalhes">
+                                    <div><dt class="slds-text-title">Duração</dt><dd class="slds-text-body_small">{item.duracao}</dd></div>
+                                    <div><dt class="slds-text-title">Canal</dt><dd class="slds-text-body_small">{item.canal}</dd></div>
+                                    <div><dt class="slds-text-title">Protocolo</dt><dd class="slds-text-body_small">{item.protocolo}</dd></div>
+                                </dl>
+                            </template>
+                            <p class="slds-text-body_small slds-text-color_weak">De {item.de} para {item.para}</p>
+                            <button
+                                type="button"
+                                class="c-timeline-vermais"
+                                data-id={item.id}
+                                aria-expanded={item.expandido}
+                                onclick={aoAlternarDetalhe}>
+                                {item.rotuloVerMais}
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Rodapé: paginação -->
+                <template lwc:if={temMais}>
+                    <button type="button" class="c-timeline-vermais c-timeline-rodape" onclick={aoVerMais}>
+                        Ver mais ({restantes} restantes)
+                    </button>
+                </template>
+                <template lwc:if={paginado}>
+                    <button type="button" class="c-timeline-vermais c-timeline-rodape" onclick={aoVerMenos}>
+                        Ver menos
+                    </button>
+                </template>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-body_small">Sem interações registradas para esta raiz.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

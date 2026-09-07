@@ -1,0 +1,21 @@
+<template>
+    <!-- P5 — Ecossistema informativo. Somente leitura via @api. -->
+    <lightning-card title="Ecossistema Porto Seguro (informativo)" icon-name="utility:co_insurance" class="slds-m-top_small">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <div class="slds-grid slds-wrap slds-gutters">
+                <template for:each={holding} for:item="vinculo">
+                    <div key={vinculo.nome} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-bottom_small">
+                        <div class="c-holding-card">
+                            <lightning-icon icon-name={vinculo.icone} size="x-small" alternative-text={vinculo.nome}></lightning-icon>
+                            <div class="c-holding-card_text">
+                                <strong>{vinculo.nome}</strong>
+                                <span class="slds-text-body_small"> — {vinculo.detalhe}</span>
+                                <span class="c-holding-card_badge">somente leitura</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

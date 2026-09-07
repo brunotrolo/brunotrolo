@@ -1,0 +1,10 @@
+/* Histórico de atendimentos (P7) — tabela, somente leitura */
+.c-tabela-rolavel {
+    overflow-x: auto;
+}
+
+.c-historico_estrelas {
+    color: #e98d2f;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}

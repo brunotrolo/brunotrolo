@@ -1,0 +1,59 @@
+/* Saúde financeira — nota + barras com média */
+.c-wellness_titulo {
+    font-weight: var(--slds-g-font-weight-4, 400);
+}
+
+.c-wellness_titulo strong {
+    font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+.c-wellness_corpo {
+    display: flex;
+    align-items: stretch;
+    gap: var(--slds-g-spacing-4, 1rem);
+}
+
+.c-wellness_nota-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: none;
+}
+
+.c-wellness_nota {
+    font-size: 1.75rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    line-height: 1.1;
+}
+
+.c-wellness_variacao {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-success-1, #056764);
+    white-space: nowrap;
+}
+
+.c-wellness_grafico {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    min-height: 84px;
+}
+
+.c-wellness_barra {
+    flex: 1;
+    min-width: 6px;
+    background: var(--slds-g-color-accent-2, #5aa9ff);
+    border-radius: 2px 2px 0 0;
+}
+
+.c-wellness_media {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #9050e9;
+}

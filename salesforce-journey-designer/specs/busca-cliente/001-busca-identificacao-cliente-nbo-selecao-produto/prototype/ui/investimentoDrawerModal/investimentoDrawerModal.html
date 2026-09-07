@@ -1,0 +1,32 @@
+<template>
+    <lightning-modal-header label="Selecionar investimento"></lightning-modal-header>
+    <lightning-modal-body>
+        <p class="slds-m-bottom_small slds-text-body_small" style="color:#5c5c5c">Carteira diversificada — renda fixa, renda variável, CDB e fundos. Escolha a posição que motivou o contato.</p>
+        <div class="slds-grid slds-wrap slds-gutters">
+            <template for:each={investimentos} for:item="inv">
+                <div key={inv.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_small">
+                    <button type="button" class="c-invest-card" style={inv.estiloCartao} data-id={inv.id} onclick={aoEscolherInvestimento} aria-label={inv.ariaLabel}>
+                        <div class="c-invest-card_top">
+                            <span class="c-invest-card_classe" style={inv.estiloTexto}>
+                                <lightning-icon icon-name={inv.icone} size="x-small" alternative-text={inv.classe}></lightning-icon>
+                                {inv.classe}
+                            </span>
+                            <lightning-badge label={inv.badge}></lightning-badge>
+                        </div>
+                        <div class="c-invest-card_produto" style={inv.estiloTexto}>{inv.produto}</div>
+                        <div class="c-invest-card_valor" style={inv.estiloTexto}>{inv.valor}</div>
+                        <div class="c-invest-card_detalhe" style={inv.estiloTexto}>{inv.detalhe}</div>
+                        <div class="c-invest-card_rodape" style={inv.estiloTexto}>
+                            <span>{inv.rentabilidade}</span>
+                            <span>{inv.vencimento}</span>
+                        </div>
+                        <div class="c-invest-card_risco" style={inv.estiloTexto}>Risco: {inv.risco}</div>
+                    </button>
+                </div>
+            </template>
+        </div>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="Cancelar" variant="neutral" onclick={aoCancelar}></lightning-button>
+    </lightning-modal-footer>
+</template>

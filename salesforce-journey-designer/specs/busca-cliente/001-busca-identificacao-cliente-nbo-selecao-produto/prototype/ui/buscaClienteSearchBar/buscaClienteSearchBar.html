@@ -1,0 +1,43 @@
+<template>
+    <!-- P1 — barra de busca (PF/PJ/Protocolo/Não cliente centralizados).
+         Independente: máscara, validação e atalhos moram aqui.
+         Emite `buscar` { tipo, normalizado } — nunca toca em resultado/hub/oferta. -->
+    <lightning-card title="Identificação do Cliente" icon-name="standard:search">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <div class="slds-align_absolute-center slds-m-bottom_medium">
+                <lightning-radio-group
+                    name="tipoPessoa"
+                    label="Selecione o tipo de busca"
+                    options={opcoesTipoPessoa}
+                    value={tipoPessoa}
+                    type="button"
+                    variant="button"
+                    onchange={aoTrocarTipoPessoa}>
+                </lightning-radio-group>
+            </div>
+            <div class="slds-align_absolute-center">
+                <div class="c-search-input">
+                    <lightning-input
+                        type="text"
+                        label={labelCampo}
+                        placeholder={placeholderDocumento}
+                        value={documentoDigitado}
+                        onkeyup={aoDigitarDocumento}
+                        field-level-help={helpCampo}>
+                    </lightning-input>
+                </div>
+            </div>
+            <div class="slds-align_absolute-center slds-m-top_small">
+                <lightning-button
+                    variant="brand"
+                    label="Localizar"
+                    icon-name="standard:search"
+                    onclick={aoBuscar}
+                    disabled={buscaDesabilitada}
+                    title="Localizar (Enter)">
+                </lightning-button>
+            </div>
+            <p class="slds-text-body_small slds-m-top_x-small slds-text-align_center" aria-live="polite">{dicaBusca}</p>
+        </div>
+    </lightning-card>
+</template>

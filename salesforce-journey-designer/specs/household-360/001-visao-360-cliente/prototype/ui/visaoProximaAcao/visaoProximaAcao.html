@@ -1,0 +1,35 @@
+<template>
+    <!-- Próxima melhor ação (NBA) — recomendações de atuação com CTA.
+         Entrada: @api acoes. O "iniciado" é estado local (mock); sem eventos. -->
+    <lightning-card title="Próxima melhor ação" icon-name="action:new_task">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={temAcoes}>
+                <template for:each={acoesEstado} for:item="acao">
+                    <div key={acao.id} class="c-nba-item">
+                        <div class="c-nba-item_topo">
+                            <span class="c-nba-item_titulo">{acao.titulo}</span>
+                            <template lwc:if={acao.ehPrimeira}>
+                                <lightning-badge label="Recomendada"></lightning-badge>
+                            </template>
+                        </div>
+                        <p class="slds-text-body_small slds-m-bottom_x-small">{acao.descricao}</p>
+                        <template lwc:if={acao.iniciada}>
+                            <p class="c-nba-item_iniciada" role="status">Ação iniciada — acompanhe na linha do tempo.</p>
+                        </template>
+                        <template lwc:else>
+                            <lightning-button
+                                label={acao.cta}
+                                variant="brand"
+                                data-id={acao.id}
+                                onclick={aoIniciar}>
+                            </lightning-button>
+                        </template>
+                    </div>
+                </template>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-body_small">Sem ações recomendadas para esta raiz no momento.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

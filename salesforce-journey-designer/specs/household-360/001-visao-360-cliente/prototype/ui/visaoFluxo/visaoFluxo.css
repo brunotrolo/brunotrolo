@@ -1,0 +1,71 @@
+/* Fluxo de entrada e saída — barras (slds-card com altura cheia) */
+:host {
+    display: block;
+    height: 100%;
+}
+
+.c-chart {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.c-chart .slds-card__body {
+    flex: 1;
+}
+
+.c-fluxo_svg {
+    max-width: 560px;
+}
+
+.c-fluxo_svg svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.c-fluxo_grade {
+    stroke: var(--slds-g-color-border-2, #e5e5e5);
+    stroke-width: 1;
+}
+
+.c-fluxo_eixo {
+    font-size: 11px;
+    fill: var(--slds-g-color-on-surface-1, #5c5c5c);
+}
+
+.c-fluxo_entrada {
+    fill: #34a853;
+}
+
+.c-fluxo_saida {
+    fill: #1f8ef1;
+}
+
+.c-fluxo_legenda {
+    display: flex;
+    gap: var(--slds-g-spacing-4, 1rem);
+    margin-top: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.c-fluxo_legenda-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 4px);
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.c-fluxo_cor {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+}
+
+.c-fluxo_cor-entrada {
+    background: #34a853;
+}
+
+.c-fluxo_cor-saida {
+    background: #1f8ef1;
+}

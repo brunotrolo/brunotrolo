@@ -1,0 +1,27 @@
+/* Aba Resumo — KPIs */
+.c-resumo-kpi {
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    padding: var(--slds-g-spacing-3, 0.75rem);
+    height: 100%;
+}
+
+.c-resumo-kpi_rotulo {
+    font-size: 0.6875rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+    text-transform: uppercase;
+}
+
+.c-resumo-kpi_valor {
+    font-size: var(--slds-g-font-scale-2, 1rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+    margin-top: 2px;
+}
+
+.c-resumo-kpi_pct {
+    color: var(--slds-g-color-success-1, #056764);
+    margin-left: var(--slds-g-spacing-1, 4px);
+}

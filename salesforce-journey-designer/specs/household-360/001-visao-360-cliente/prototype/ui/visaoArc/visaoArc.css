@@ -1,0 +1,202 @@
+/* Mapa de relacionamentos no estilo ARC (P3) */
+.c-arc-raiz {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 4px);
+    margin-bottom: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.c-arc-raiz_no {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 4px);
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: var(--slds-g-spacing-3, 0.75rem) var(--slds-g-spacing-4, 1rem);
+}
+
+.c-arc-raiz_nome {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.c-arc-fio {
+    width: var(--slds-g-sizing-border-1, 1px);
+    height: 14px;
+    background: var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.c-arc-add {
+    width: 100%;
+    max-width: 220px;
+    background: transparent;
+    border: var(--slds-g-sizing-border-1, 1px) dashed var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    color: var(--slds-g-color-accent-1, #066afe);
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    padding: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-2, 0.5rem);
+    cursor: not-allowed;
+}
+
+.c-arc-grupos {
+    position: relative;
+    padding-top: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.c-arc-grupos::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 12%;
+    right: 12%;
+    height: var(--slds-g-sizing-border-1, 1px);
+    background: var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.c-arc-grupo {
+    position: relative;
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: var(--slds-g-spacing-3, 0.75rem);
+    height: 100%;
+    margin-bottom: var(--slds-g-spacing-3, 0.75rem);
+}
+
+.c-arc-grupo_stub {
+    position: absolute;
+    top: calc(var(--slds-g-spacing-2, 0.5rem) * -1);
+    left: 50%;
+    width: var(--slds-g-sizing-border-1, 1px);
+    height: var(--slds-g-spacing-2, 0.5rem);
+    background: var(--slds-g-color-border-1, #c9c9c9);
+}
+
+.c-arc-grupo_recolher {
+    position: absolute;
+    top: var(--slds-g-spacing-1, 4px);
+    right: var(--slds-g-spacing-1, 4px);
+    background: transparent;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    line-height: 0;
+}
+
+.c-arc-grupo_topo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+    padding-right: var(--slds-g-spacing-4, 1rem);
+}
+
+.c-arc-grupo_titulo {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-accent-1, #066afe);
+}
+
+.c-arc-grupo_sub {
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+}
+
+.c-arc-grupo_selo {
+    font-size: 0.6875rem;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+    text-transform: uppercase;
+    text-align: center;
+    margin: 4px 0 2px 0;
+}
+
+.c-arc-membros {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--slds-g-spacing-2, 0.5rem) 0;
+}
+
+.c-arc-membros li {
+    margin-bottom: var(--slds-g-spacing-1, 4px);
+}
+
+.c-arc-no {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    width: 100%;
+    text-align: left;
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: var(--slds-g-sizing-border-1, 1px) solid var(--slds-g-color-border-1, #c9c9c9);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.c-arc-no:hover {
+    border-color: var(--slds-g-color-border-2, #5c5c5c);
+}
+
+.c-arc-no_selecionado {
+    border-color: var(--slds-g-color-accent-1, #066afe);
+    box-shadow: var(--slds-g-shadow-1, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+.c-arc-membro_barra {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+}
+
+.c-arc-membro_barra_principal {
+    background: #0eb9c8;
+}
+
+.c-arc-membro_barra_vinculo {
+    background: #9050e9;
+}
+
+.c-arc-membro_textos {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.c-arc-membro_nome {
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-accent-1, #066afe);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.c-arc-membro_papel {
+    font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+    color: var(--slds-g-color-on-surface-1, #5c5c5c);
+}
+
+.c-arc-detalhe {
+    background: var(--slds-g-color-surface-2, #f3f3f3);
+    border-radius: var(--slds-g-radius-border-1, 0.25rem);
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-3, 0.75rem);
+    font-size: var(--slds-g-font-size-base, 0.8125rem);
+    color: var(--slds-g-color-on-surface-2, #2e2e2e);
+}
+
+.c-arc-acoes {
+    display: flex;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    justify-content: space-between;
+}

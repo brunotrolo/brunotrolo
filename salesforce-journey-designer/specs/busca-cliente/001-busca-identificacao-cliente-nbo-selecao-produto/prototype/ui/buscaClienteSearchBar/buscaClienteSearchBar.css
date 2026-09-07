@@ -1,0 +1,5 @@
+/* Largura do campo sem valor mágico solto no template */
+.c-search-input {
+    width: 420px;
+    max-width: 100%;
+}

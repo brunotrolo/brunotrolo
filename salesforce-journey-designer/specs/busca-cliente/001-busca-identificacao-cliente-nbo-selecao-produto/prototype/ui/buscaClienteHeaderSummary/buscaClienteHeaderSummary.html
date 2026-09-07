@@ -1,0 +1,51 @@
+<template>
+    <!-- P3 — dados cadastrais enriquecidos. Somente leitura via @api. -->
+    <div class="slds-m-top_small c-cliente-card" aria-live="polite">
+        <div class="c-cliente-card_header">
+            <lightning-icon icon-name={iconeTipoPessoa} size="small" alternative-text={cliente.tipoPessoa}></lightning-icon>
+            <div class="c-cliente-card_titulos">
+                <h2 class="c-cliente-card_nome">{cliente.nome}</h2>
+                <p class="c-cliente-card_sub">{cliente.tipoPessoa} • {cliente.documentoFormatado} • <span class="c-cliente-card_badge">{cliente.segmento}</span></p>
+            </div>
+            <div class="c-cliente-card_status">
+                <lightning-badge label={cliente.statusCadastro}></lightning-badge>
+            </div>
+        </div>
+        <div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                <div class="c-cliente-card_bloco">
+                    <div class="c-cliente-card_rotulo"><lightning-icon icon-name="utility:email" size="xx-small" alternative-text="Email"></lightning-icon> Contato</div>
+                    <div class="c-cliente-card_linha">{cliente.email}</div>
+                    <div class="c-cliente-card_linha">{cliente.telefone} • {cliente.celular}</div>
+                </div>
+                <div class="c-cliente-card_bloco slds-m-top_x-small">
+                    <div class="c-cliente-card_rotulo"><lightning-icon icon-name="utility:birthday" size="xx-small" alternative-text="Nascimento"></lightning-icon> Nascimento</div>
+                    <div class="c-cliente-card_linha">{cliente.dataNascimento}</div>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                <div class="c-cliente-card_bloco">
+                    <div class="c-cliente-card_rotulo"><lightning-icon icon-name="utility:checkin" size="xx-small" alternative-text="Endereço"></lightning-icon> Endereço</div>
+                    <div class="c-cliente-card_linha">{cliente.endereco}</div>
+                    <div class="c-cliente-card_linha">CEP {cliente.cep}</div>
+                </div>
+                <div class="c-cliente-card_bloco slds-m-top_x-small">
+                    <div class="c-cliente-card_rotulo"><lightning-icon icon-name="utility:money" size="xx-small" alternative-text="Renda"></lightning-icon> Renda presumida</div>
+                    <div class="c-cliente-card_linha c-cliente-card_linha--destaque">{cliente.renda}</div>
+                    <div class="c-cliente-card_linha slds-text-body_small">{cliente.score}</div>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                <div class="c-cliente-card_bloco">
+                    <div class="c-cliente-card_rotulo"><lightning-icon icon-name="utility:company" size="xx-small" alternative-text="Agência"></lightning-icon> Relacionamento</div>
+                    <div class="c-cliente-card_linha">Ag {cliente.agencia} • Conta {cliente.conta}</div>
+                    <div class="c-cliente-card_linha">{cliente.tempoRelacionamento}</div>
+                </div>
+                <div class="c-cliente-card_bloco slds-m-top_x-small">
+                    <div class="c-cliente-card_rotulo"><lightning-icon icon-name="utility:clock" size="xx-small" alternative-text="Status"></lightning-icon> Status</div>
+                    <div class="c-cliente-card_linha">{cliente.statusCadastro}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

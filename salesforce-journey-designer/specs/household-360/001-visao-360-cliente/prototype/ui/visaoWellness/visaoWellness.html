@@ -1,0 +1,28 @@
+<template>
+    <!-- Saúde financeira — nota, variação e evolução em barras com média (mock).
+         Entrada: @api wellness {nota, variacao, nivel, barras[]}. Sem eventos. -->
+    <lightning-card>
+        <span slot="title" class="c-wellness_titulo">
+            Saúde financeira:&nbsp;<strong>{wellness.nivel}</strong>
+        </span>
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={wellness}>
+                <div class="c-wellness_corpo">
+                    <div class="c-wellness_nota-col">
+                        <span class="c-wellness_nota">{wellness.nota}</span>
+                        <span class="c-wellness_variacao">▲ {wellness.variacao}</span>
+                    </div>
+                    <div class="c-wellness_grafico" role="img" aria-label="Evolução da pontuação nos últimos 12 meses">
+                        <template for:each={barras} for:item="barra">
+                            <div key={barra.indice} class="c-wellness_barra" style={barra.estilo} title={barra.titulo}></div>
+                        </template>
+                        <div class="c-wellness_media" style={estiloMedia} title="Média do período"></div>
+                    </div>
+                </div>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-body_small">Sem pontuação para esta raiz.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

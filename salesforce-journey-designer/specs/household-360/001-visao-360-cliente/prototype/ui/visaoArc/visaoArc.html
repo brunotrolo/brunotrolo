@@ -1,0 +1,113 @@
+<template>
+    <!-- P3 — mapa de relacionamentos no estilo do ARC nativo (grupos + membros
+         + papéis), com a raiz no topo. Entrada via @api; saída: `trocarraiz`. -->
+    <lightning-card title="Relacionamentos" icon-name="standard:household">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={temNos}>
+                <!-- Raiz do mapa -->
+                <div class="c-arc-raiz">
+                    <div class="c-arc-raiz_no">
+                        <lightning-icon icon-name={iconeRaiz} size="small" alternative-text={raizNome}></lightning-icon>
+                        <span class="c-arc-raiz_nome">{raizNome}</span>
+                    </div>
+                    <div class="c-arc-fio" aria-hidden="true"></div>
+                    <button
+                        type="button"
+                        class="c-arc-add"
+                        disabled
+                        title="Criação de grupo é capacidade futura (fora do MVP)">
+                        + Adicionar grupo
+                    </button>
+                    <div class="c-arc-fio" aria-hidden="true"></div>
+                </div>
+
+                <!-- Grupos lado a lado -->
+                <div class="slds-grid slds-wrap slds-gutters c-arc-grupos">
+                    <template for:each={grupos} for:item="grupo">
+                        <div key={grupo.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <div class="c-arc-grupo">
+                                <div class="c-arc-grupo_stub" aria-hidden="true"></div>
+                                <button
+                                    type="button"
+                                    class="c-arc-grupo_recolher"
+                                    data-id={grupo.id}
+                                    title={grupo.tituloRecolher}
+                                    aria-expanded={grupo.expandido}
+                                    onclick={aoAlternarGrupo}>
+                                    <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text={grupo.tituloRecolher}></lightning-icon>
+                                </button>
+                                <div class="c-arc-grupo_topo">
+                                    <lightning-icon icon-name="standard:groups" size="small" alternative-text="Grupo"></lightning-icon>
+                                    <div class="c-arc-grupo_titulo">{grupo.titulo}</div>
+                                    <div class="c-arc-grupo_sub">{grupo.subtitulo}</div>
+                                </div>
+                                <template lwc:if={grupo.principal}>
+                                    <div class="c-arc-grupo_selo">Grupo principal</div>
+                                </template>
+                                <template lwc:if={grupo.expandido}>
+                                    <ul class="c-arc-membros">
+                                        <template for:each={grupo.membros} for:item="no">
+                                            <li key={no.id}>
+                                                <button
+                                                    type="button"
+                                                    class={no.classeNo}
+                                                    data-id={no.id}
+                                                    title={no.dica}
+                                                    aria-pressed={no.selecionado}
+                                                    onclick={aoClicarNo}>
+                                                    <span class={no.classeBarra} aria-hidden="true"></span>
+                                                    <lightning-icon icon-name={no.icone} size="x-small" alternative-text={no.tipo}></lightning-icon>
+                                                    <span class="c-arc-membro_textos">
+                                                        <span class="c-arc-membro_nome">{no.nome}</span>
+                                                        <span class="c-arc-membro_papel">{no.papel}</span>
+                                                    </span>
+                                                    <lightning-icon icon-name="utility:chevrondown" size="xx-small" alternative-text="Detalhar"></lightning-icon>
+                                                </button>
+                                                <template lwc:if={no.ehMembroPrincipal}>
+                                                    <div class="c-arc-grupo_selo">Membro principal</div>
+                                                </template>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                    <button
+                                        type="button"
+                                        class="c-arc-add"
+                                        disabled
+                                        title="Criação de vínculo é capacidade futura (fora do MVP)">
+                                        + Adicionar vínculo
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Detalhe rápido do nó selecionado (o completo vive no modal) -->
+                <template lwc:if={noSelecionado}>
+                    <div class="c-arc-detalhe slds-m-top_x-small" aria-live="polite">
+                        <strong>{noSelecionado.nome}</strong> — {noSelecionado.papel} ({noSelecionado.tipo}).
+                    </div>
+                </template>
+                <p class="slds-text-body_small slds-m-top_x-small">{notaLimite}</p>
+                <div class="c-arc-acoes slds-m-top_x-small">
+                    <lightning-button
+                        label="Ver árvore completa"
+                        variant="neutral"
+                        icon-name="standard:hierarchy"
+                        onclick={aoVerArvoreCompleta}>
+                    </lightning-button>
+                    <lightning-button
+                        label="Editar"
+                        variant="neutral"
+                        icon-name="action:edit"
+                        disabled
+                        title="Edição do mapa é capacidade futura (fora do MVP)">
+                    </lightning-button>
+                </div>
+            </template>
+            <template lwc:else>
+                <p>Nenhum vínculo de relacionamento para esta raiz.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

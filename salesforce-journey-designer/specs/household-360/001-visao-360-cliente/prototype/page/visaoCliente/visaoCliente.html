@@ -1,0 +1,232 @@
+<template>
+    <!-- Shell orquestrador — dono do estado da página: raiz (?doc=), aba ativa,
+         flags de carga por área, ofertas NBO, sub-abas paralelas de detalhe
+         (máx. 2 lado a lado) e troca de raiz vinda da árvore.
+         Layout: destaques no topo; abaixo, conteúdo das subabas à esquerda e
+         sidebar fixa (NBO + Tags) à direita, visível em todas as subabas.
+         Filhos independentes (1 bloco = 1 responsabilidade).
+         Ajustar um filho nunca exige tocar em outro nem neste shell. -->
+
+    <!-- P1/P2 — faixa de destaques + perfil -->
+    <template lwc:if={carregandoHeader}>
+        <lightning-card title="Carregando visão do cliente…" icon-name="standard:contact" class="slds-m-bottom_small">
+            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                <lightning-spinner alternative-text="Carregando destaques do cliente" size="small"></lightning-spinner>
+                <div class="c-skeleton-bar c-skeleton-bar_titulo slds-size_3-of-5" aria-hidden="true"></div>
+                <div class="c-skeleton-bar" aria-hidden="true"></div>
+            </div>
+        </lightning-card>
+    </template>
+    <template lwc:else>
+        <ui-visao-header cliente={cliente}></ui-visao-header>
+
+        <div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
+            <!-- Esquerda — subabas navegáveis -->
+            <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                <!-- Subabas da Visão 360° (telas de referência, pt-BR) -->
+                <div class="slds-tabs_default">
+                    <ul class="slds-tabs_default__nav" role="tablist" aria-label="Seções da visão do cliente">
+                        <template for:each={abas} for:item="aba">
+                            <li key={aba.id} class={aba.classe} role="presentation">
+                                <button
+                                    type="button"
+                                    class="slds-tabs_default__link"
+                                    role="tab"
+                                    aria-selected={aba.ativa}
+                                    data-id={aba.id}
+                                    onclick={aoTrocarAba}>
+                                    {aba.rotulo}
+                                </button>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+
+                <!-- Aba Resumo — KPIs, eventos, wellness/planejamento -->
+                <template lwc:if={ehAbaResumo}>
+                    <div class="slds-m-top_small">
+                        <ui-visao-resumo resumo={resumo}></ui-visao-resumo>
+                    </div>
+                    <div class="slds-m-top_small">
+                        <ui-visao-eventos eventos={eventosVida}></ui-visao-eventos>
+                    </div>
+                    <div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <ui-visao-wellness wellness={wellness}></ui-visao-wellness>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <ui-visao-planejamento planejamento={planejamento}></ui-visao-planejamento>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Aba Inteligência — atendimento/CSAT, comportamento, campanhas -->
+                <template lwc:if={ehAbaInteligencia}>
+                    <div class="slds-m-top_small">
+                        <ui-visao-inteligencia
+                            comportamento={comportamento}
+                            campanhas={campanhasLista}
+                            fluxo={fluxo}
+                            segmentacao={segmentacao}>
+                        </ui-visao-inteligencia>
+                    </div>
+                </template>
+
+                <!-- Aba Financial Accounts — totais + inventário (P4) + detalhes voláteis (P5) -->
+                <template lwc:if={ehAbaAccounts}>
+                    <div class="slds-m-top_small">
+                        <div class="slds-m-bottom_small">
+                            <ui-visao-contas-resumo resumo={resumo} total={totalAtivos}></ui-visao-contas-resumo>
+                        </div>
+                        <template lwc:if={carregandoAtivos}>
+                            <lightning-card title="Produtos" icon-name="utility:card_details">
+                                <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                                    <lightning-spinner alternative-text="Carregando inventário de ativos" size="small"></lightning-spinner>
+                                    <div class="c-skeleton-bar" aria-hidden="true"></div>
+                                    <div class="c-skeleton-bar slds-size_2-of-5" aria-hidden="true"></div>
+                                </div>
+                            </lightning-card>
+                        </template>
+                        <template lwc:else>
+                            <ui-visao-ativos
+                                ativos={ativosLista}
+                                selecionado-id={selecionadoId}
+                                onselecionar={aoSelecionarAtivo}>
+                            </ui-visao-ativos>
+                        </template>
+
+                        <!-- Cenário 16 — sub-abas paralelas (até 2 detalhes lado a lado) -->
+                        <template lwc:if={temDetalhes}>
+                            <div class="slds-tabs_scoped slds-m-top_small" role="tablist" aria-label="Detalhes de ativos em paralelo">
+                                <ul class="slds-tabs_scoped__nav">
+                                    <template for:each={abasDetalhe} for:item="aba">
+                                        <li key={aba.ativoId} class={aba.classeAba} role="presentation">
+                                            <button
+                                                type="button"
+                                                class="slds-tabs_scoped__link"
+                                                role="tab"
+                                                aria-selected={aba.ativa}
+                                                data-id={aba.ativoId}
+                                                onclick={aoFocarDetalhe}>
+                                                {aba.ativo.rotulo}
+                                            </button>
+                                            <lightning-button-icon
+                                                icon-name="utility:clear"
+                                                alternative-text="Fechar detalhe"
+                                                title="Fechar detalhe"
+                                                data-id={aba.ativoId}
+                                                onclick={aoFecharDetalhe}>
+                                            </lightning-button-icon>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                            <div class="slds-grid slds-wrap slds-gutters">
+                                <template for:each={abasDetalhe} for:item="aba">
+                                    <div key={aba.ativoId} class={tamanhoPainelDetalhe}>
+                                        <ui-visao-ativo-detalhe
+                                            ativo={aba.ativo}
+                                            detalhe={aba.detalhe}
+                                            carregando={aba.carregando}
+                                            erro={aba.erro}
+                                            hora-atualizacao={aba.horaAtualizacao}
+                                            em-destaque={aba.ativa}
+                                            onrecarregar={aoRecarregarDetalhe}
+                                            onfechar={aoFecharDetalhe}>
+                                        </ui-visao-ativo-detalhe>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template lwc:if={mostrarPlaceholderDetalhe}>
+                            <div class="slds-scoped-notification slds-media slds-media_center slds-scoped-notification_light slds-m-top_small" role="status">
+                                <div class="slds-media__figure">
+                                    <lightning-icon icon-name="action:info" size="small" alternative-text="Nenhum ativo selecionado"></lightning-icon>
+                                </div>
+                                <div class="slds-media__body">
+                                    <p>Selecione um ativo no inventário para ver saldos, limites e demais dados em tempo real.</p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Aba Financial Goals — resumo financeiro + objetivos -->
+                <template lwc:if={ehAbaGoals}>
+                    <div class="slds-m-top_small">
+                        <ui-visao-resumo resumo={resumo}></ui-visao-resumo>
+                    </div>
+                    <div class="slds-m-top_small">
+                        <ui-visao-metas metas={metasLista}></ui-visao-metas>
+                    </div>
+                </template>
+
+                <!-- Aba Relacionamentos — árvore de vínculos (P3) -->
+                <template lwc:if={ehAbaRelacionamentos}>
+                    <div class="slds-m-top_small">
+                        <template lwc:if={carregandoArc}>
+                            <lightning-card title="Relacionamentos" icon-name="standard:household">
+                                <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                                    <lightning-spinner alternative-text="Carregando relacionamentos" size="small"></lightning-spinner>
+                                    <div class="c-skeleton-bar" aria-hidden="true"></div>
+                                    <div class="c-skeleton-bar slds-size_4-of-5" aria-hidden="true"></div>
+                                </div>
+                            </lightning-card>
+                        </template>
+                        <template lwc:else>
+                            <ui-visao-arc
+                                nos={arcNos}
+                                arvore={arcArvore}
+                                total-vinculos={arcTotalVinculos}
+                                doc-atual={docRaiz}
+                                raiz-nome={cliente.nome}
+                                ontrocarraiz={aoTrocarRaiz}>
+                            </ui-visao-arc>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Aba Atividades — NBA + próximos passos, timeline e histórico (P7) -->
+                <template lwc:if={ehAbaAtividades}>
+                    <div class="slds-m-top_small">
+                        <ui-visao-proxima-acao acoes={acoesLista}></ui-visao-proxima-acao>
+                    </div>
+                    <div class="slds-m-top_small">
+                        <ui-visao-tarefas tarefas={tarefasLista}></ui-visao-tarefas>
+                    </div>
+                    <div class="slds-m-top_small">
+                        <template lwc:if={carregandoHistorico}>
+                            <lightning-card title="Atividades" icon-name="standard:task">
+                                <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                                    <lightning-spinner alternative-text="Carregando atividades" size="small"></lightning-spinner>
+                                    <div class="c-skeleton-bar" aria-hidden="true"></div>
+                                </div>
+                            </lightning-card>
+                        </template>
+                        <template lwc:else>
+                            <ui-visao-atividades interacoes={interacoesLista}></ui-visao-atividades>
+                            <div class="slds-m-top_small">
+                                <ui-visao-historico casos={casosLista}></ui-visao-historico>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Direita — sidebar fixa em todas as subabas (NBO + Tags) -->
+            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+                <ui-visao-nbo
+                    ofertas={ofertas}
+                    erro={nboErro}
+                    motor={nboMotor}
+                    onrecusar={aoRecusarOferta}
+                    oncontratar={aoContratarOferta}
+                    ontentar={aoTentarNbo}>
+                </ui-visao-nbo>
+                <div class="slds-m-top_small">
+                    <ui-visao-tags tags={tags}></ui-visao-tags>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

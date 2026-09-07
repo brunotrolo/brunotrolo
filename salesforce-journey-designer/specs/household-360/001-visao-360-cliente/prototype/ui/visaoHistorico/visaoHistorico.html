@@ -1,0 +1,45 @@
+<template>
+    <!-- P7 — histórico de atendimentos em tabela (Cenário 14). Somente leitura:
+         sem criar protocolo, sem eventos. -->
+    <lightning-card title="Histórico de atendimentos" icon-name="standard:case" class="slds-m-top_small">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={temCasos}>
+                <div class="c-tabela-rolavel">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-label="Histórico de atendimentos">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col"><div class="slds-truncate">Protocolo</div></th>
+                            <th scope="col"><div class="slds-truncate">Data</div></th>
+                            <th scope="col"><div class="slds-truncate">Assunto</div></th>
+                            <th scope="col"><div class="slds-truncate">Categoria</div></th>
+                            <th scope="col"><div class="slds-truncate">Canal</div></th>
+                            <th scope="col"><div class="slds-truncate">Responsável</div></th>
+                            <th scope="col"><div class="slds-truncate">Situação</div></th>
+                            <th scope="col"><div class="slds-truncate">Satisfação</div></th>
+                            <th scope="col"><div class="slds-truncate">Resolução</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={casosApresentacao} for:item="caso">
+                            <tr key={caso.id} class="slds-hint-parent">
+                                <td><div class="slds-truncate">{caso.protocolo}</div></td>
+                                <td><div class="slds-truncate">{caso.data}</div></td>
+                                <td><div class="slds-truncate" title={caso.motivo}>{caso.motivo}</div></td>
+                                <td><div class="slds-truncate">{caso.categoria}</div></td>
+                                <td><div class="slds-truncate">{caso.canal}</div></td>
+                                <td><div class="slds-truncate">{caso.responsavel}</div></td>
+                                <td><lightning-badge label={caso.situacao}></lightning-badge></td>
+                                <td><div class="slds-truncate c-historico_estrelas" aria-label="Satisfação {caso.satisfacao} de 5">{caso.estrelas}</div></td>
+                                <td><div class="slds-truncate">{caso.resolucao}</div></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                </div>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-body_small">Nenhum atendimento registrado para esta conta.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>
