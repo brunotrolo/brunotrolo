@@ -20,11 +20,11 @@
 
 **Eu sou...**
 
-- 🧩 Salesforce Architect, construindo soluções em [Apex, LWC, SOQL e Flow](https://github.com/brunotrolo/Salesforce_LWC-Developer)
-- 🤖 Criador do [MCP_WhatsApp](https://github.com/brunotrolo/MCP_WhatsApp), servidor MCP que conecta IA ao WhatsApp
-- 📈 Criador do [MCP_OplabAPI](https://github.com/brunotrolo/MCP_OplabAPI), servidor MCP para dados de opções da B3
-- ⚙️ Automation Engineer com Google Apps Script — veja [APP_GAS_StockOps](https://github.com/brunotrolo/APP_GAS_StockOps)
-- 🌱 Sempre estudando agentes de IA, LLMs e arquitetura de sistemas
+- Salesforce Architect — construo soluções em [Apex, LWC, SOQL e Flow](https://github.com/brunotrolo/Salesforce_LWC-Developer)
+- Criador de [MCP_WhatsApp](https://github.com/brunotrolo/MCP_WhatsApp) — servidor MCP que conecta IA ao WhatsApp
+- Criador de [MCP_OplabAPI](https://github.com/brunotrolo/MCP_OplabAPI) — acesso a dados de opções da B3 via API
+- Automation Engineer — especialista em Google Apps Script, integrações e pipelines — veja [APP_GAS_StockOps](https://github.com/brunotrolo/APP_GAS_StockOps)
+- Apaixonado por agentes de IA, LLMs e arquitetura de sistemas
 
 <br>
 
