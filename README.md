@@ -34,6 +34,8 @@
 [X (Twitter)](https://twitter.com/brunotrolo) ·
 [E-Mail](mailto:brunotrolo@gmail.com)
 
+**My GitHub Activities**
+
 [PRs criadas](https://github.com/pulls?q=is%3Apr+author%3Abrunotrolo+-user%3Abrunotrolo) ·
 [PRs mergeadas](https://github.com/pulls?q=is%3Apr+author%3Abrunotrolo+is%3Amerged+) ·
 [PRs revisadas](https://github.com/pulls?q=is%3Apr+reviewed-by%3Abrunotrolo+-user%3Abrunotrolo) ·
