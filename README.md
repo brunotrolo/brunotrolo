@@ -36,6 +36,13 @@
 
 **Minhas atividades no GitHub**
 
+Últimas contribuições — Envolvido com 170+ repositórios públicos e privados
+
+Tipo de contribuição:
+- Code review — 8%
+- Issues — 3%
+- Pull requests — 13%
+
 [PRs criadas](https://github.com/pulls?q=is%3Apr+author%3Abrunotrolo+-user%3Abrunotrolo) ·
 [PRs mergeadas](https://github.com/pulls?q=is%3Apr+author%3Abrunotrolo+is%3Amerged+) ·
 [PRs revisadas](https://github.com/pulls?q=is%3Apr+reviewed-by%3Abrunotrolo+-user%3Abrunotrolo) ·
