@@ -141,6 +141,21 @@ foco:      "Transformar processos complexos em automações elegantes"
 
 <div align="center">
 
+<picture>
+  <source
+    srcset="https://github-readme-stats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&hide_title=true&hide_border=true&theme=tokyonight&disable_animations=true"
+    media="(prefers-color-scheme: dark)"
+  />
+  <source
+    srcset="https://github-readme-stats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&theme=transparent&hide_title=true&hide_border=true&disable_animations=true"
+    media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)"
+  />
+  <img src="https://github-readme-stats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&theme=transparent&hide_title=true&hide_border=true&disable_animations=true" alt="Estatísticas do GitHub de Bruno Teixeira" />
+</picture>
+
+<br/>
+<br/>
+
 <img src="https://streak-stats.demolab.com?user=brunotrolo&theme=tokyonight&hide_border=true&background=1a1b27&ring=8B5CF6&fire=8B5CF6&currStreakLabel=8B5CF6" alt="Sequência de contribuições de Bruno Teixeira no GitHub" />
 
 <br/>
