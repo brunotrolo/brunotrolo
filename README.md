@@ -9,12 +9,8 @@
 ============================================================================
 -->
 
-<a href="https://www.linkedin.com/in/bruno-teixeira-rolo/#gh-light-mode-only">
-  <img src="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header.svg#gh-light-mode-only" width="100%">
-</a>
-<a href="https://www.linkedin.com/in/bruno-teixeira-rolo/#gh-dark-mode-only">
-  <img src="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header.svg#gh-dark-mode-only" width="100%">
-</a>
+[![Bruno Teixeira](https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-light.svg#gh-light-mode-only)](https://www.linkedin.com/in/bruno-teixeira-rolo/)
+[![Bruno Teixeira](https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-dark.svg#gh-dark-mode-only)](https://www.linkedin.com/in/bruno-teixeira-rolo/)
 
 <br>
 <br>
@@ -24,14 +20,14 @@
 
 <picture>
   <source
-    srcset="https://github-readme-stats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&hide_title=true&hide_border=true&theme=tokyonight&disable_animations=true"
+    srcset="https://grstats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&hide_title=true&hide_border=true&theme=tokyonight&disable_animations=true"
     media="(prefers-color-scheme: dark)"
   />
   <source
-    srcset="https://github-readme-stats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&theme=transparent&hide_title=true&hide_border=true&disable_animations=true"
+    srcset="https://grstats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&theme=transparent&hide_title=true&hide_border=true&disable_animations=true"
     media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)"
   />
-  <img src="https://github-readme-stats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&theme=transparent&hide_title=true&hide_border=true&disable_animations=true" align="right" />
+  <img src="https://grstats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&theme=transparent&hide_title=true&hide_border=true&disable_animations=true" align="right" />
 </picture>
 
 **Eu sou...**
