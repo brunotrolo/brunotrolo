@@ -18,18 +18,6 @@
 [![Hits](https://komarev.com/ghpvc/?username=brunotrolo&label=Visitas%20no%20perfil&color=8B5CF6&style=flat-square)](https://github.com/brunotrolo)
 [![Followers](https://img.shields.io/github/followers/brunotrolo?label=Seguidores&style=flat-square&color=8B5CF6&labelColor=1a1b27)](https://github.com/brunotrolo?tab=followers)
 
-<picture>
-  <source
-    srcset="https://grstats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&hide_title=true&hide_border=true&theme=tokyonight&disable_animations=true"
-    media="(prefers-color-scheme: dark)"
-  />
-  <source
-    srcset="https://grstats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&theme=transparent&hide_title=true&hide_border=true&disable_animations=true"
-    media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)"
-  />
-  <img src="https://grstats.vercel.app/api?username=brunotrolo&include_all_commits=true&show=prs_merged&show_icons=true&theme=transparent&hide_title=true&hide_border=true&disable_animations=true" align="right" />
-</picture>
-
 **Eu sou...**
 
 - 🧩 Salesforce Architect, construindo soluções em [Apex, LWC, SOQL e Flow](https://github.com/brunotrolo/Salesforce_LWC-Developer)
