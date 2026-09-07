@@ -9,8 +9,11 @@
 ============================================================================
 -->
 
-[![Bruno Teixeira](https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-light.svg#gh-light-mode-only)](https://www.linkedin.com/in/bruno-teixeira-rolo/)
-[![Bruno Teixeira](https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-dark.svg#gh-dark-mode-only)](https://www.linkedin.com/in/bruno-teixeira-rolo/)
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-dark.svg">
+  <img src="https://raw.githubusercontent.com/brunotrolo/brunotrolo/master/assets/header-light.svg" alt="Bruno Teixeira" width="100%">
+</picture>
 
 <br>
 <br>
