@@ -44,6 +44,18 @@
 
 <br>
 
+**Atividade**
+
+Contribuições no último ano — Envolvido com 170+ repositórios públicos e privados
+
+Tipo de atividade:
+- Pull Requests — 13%
+- Issues — 3%
+- Code Review — 8%
+- Commits — 76%
+
+<br>
+
 **Onde me encontrar**
 
 [LinkedIn](https://www.linkedin.com/in/bruno-teixeira-rolo/) ·
