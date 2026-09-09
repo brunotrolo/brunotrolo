@@ -1,0 +1,767 @@
+{
+  "states": [
+    {
+      "fields": [],
+      "conditions": {
+        "id": "state-condition-object",
+        "isParent": true,
+        "group": []
+      },
+      "definedActions": {
+        "actions": []
+      },
+      "name": "Active",
+      "isSmartAction": false,
+      "smartAction": {},
+      "styleObject": {
+        "padding": [
+          {
+            "type": "around",
+            "size": "medium"
+          }
+        ],
+        "margin": [
+          {
+            "type": "bottom",
+            "size": "x-small"
+          }
+        ],
+        "container": {
+          "class": "slds-card"
+        },
+        "size": {
+          "isResponsive": false,
+          "default": "12"
+        },
+        "sizeClass": "slds-size_12-of-12 ",
+        "class": "slds-card slds-p-around_medium slds-m-bottom_x-small",
+        "background": {
+          "color": "#ffffff",
+          "image": "",
+          "size": "",
+          "repeat": "",
+          "position": ""
+        },
+        "border": {
+          "type": "solid",
+          "width": "1px",
+          "color": "#c9c9c9",
+          "radius": "8px",
+          "style": ""
+        }
+      },
+      "css": "\n.c-hdr-tipo{font-size:12px;color:#5c5c5c}\n.c-hdr-nome{font-size:20px;color:#032d60;font-weight:400;margin:2px 0 8px 0}\n.c-hdr-selo{display:inline-block;border-radius:999px;padding:2px 12px;font-size:12px;font-weight:700;color:#fff;margin-right:6px}\n.c-hdr-selo-ouro{background:#f5a623}\n.c-hdr-selo-verde{background:#1f9e6e}\n.c-hdr-secao{font-size:13px;color:#5c5c5c;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid #c9c9c9;padding-bottom:4px;margin:14px 0 10px 0}\n.c-hdr-campo{margin-bottom:8px}\n.c-hdr-label{font-size:11px;color:#5c5c5c}\n.c-hdr-valor{font-size:13px;color:#2e2e2e}\n.c-hdr-valor-forte{font-weight:700}\n.c-hdr-verde{color:#056764}\n.c-hdr-avatar{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#5aa9ff;color:#fff;font-size:13px;font-weight:700}\n.c-hdr-resp-nome{font-size:13px;color:#066afe;margin-left:8px}\n.c-hdr-mt-sm{margin-top:4px}\n.c-hdr-mt-md{margin-top:10px}\n",
+      "components": {
+        "layer-0": {
+          "children": [
+            {
+              "name": "Block",
+              "element": "block",
+              "size": {
+                "isResponsive": false,
+                "default": "4"
+              },
+              "stateIndex": 0,
+              "class": "slds-col ",
+              "property": {
+                "label": "Block",
+                "collapsible": false,
+                "record": "{record}",
+                "collapsedByDefault": false,
+                "card": "{card}"
+              },
+              "type": "block",
+              "styleObject": {
+                "padding": [
+                  {
+                    "type": "around",
+                    "size": "x-small"
+                  }
+                ],
+                "class": "slds-p-around_x-small ",
+                "sizeClass": "slds-size_4-of-12 ",
+                "size": {
+                  "isResponsive": false,
+                  "default": "4"
+                }
+              },
+              "children": [
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-tipo%22%3E%7BtipoPessoa%7D%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-nome%22%3E%7Bnome%7D%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%3E%3Cspan%20class%3D%22c-hdr-selo%20c-hdr-selo-ouro%22%3E%7Bsegmento%7D%3C/span%3E%3Cspan%20class%3D%22c-hdr-selo%20c-hdr-selo-verde%22%3E%7Bstatus%7D%3C/span%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-secao%22%3EAutentica%C3%A7%C3%A3o%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-campo%22%3E%3Cdiv%20class%3D%22c-hdr-label%22%3ETelefone%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%22%3E%7Btelefone%7D%3C/div%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-campo%22%3E%3Cdiv%20class%3D%22c-hdr-label%22%3EE-mail%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%22%3E%7Bemail%7D%3C/div%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-campo%22%3E%3Cdiv%20class%3D%22c-hdr-label%22%3EEndere%C3%A7o%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%22%3E%7BperfilEndereco%7D%3C/div%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-campo%22%3E%3Cdiv%20class%3D%22c-hdr-label%22%3EAg%C3%AAncia%20/%20Conta%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%22%3E%7BperfilAgenciaConta%7D%3C/div%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Block",
+              "element": "block",
+              "size": {
+                "isResponsive": false,
+                "default": "4"
+              },
+              "stateIndex": 0,
+              "class": "slds-col ",
+              "property": {
+                "label": "Block",
+                "collapsible": false,
+                "record": "{record}",
+                "collapsedByDefault": false,
+                "card": "{card}"
+              },
+              "type": "block",
+              "styleObject": {
+                "padding": [
+                  {
+                    "type": "around",
+                    "size": "x-small"
+                  }
+                ],
+                "class": "slds-p-around_x-small ",
+                "sizeClass": "slds-size_4-of-12 ",
+                "size": {
+                  "isResponsive": false,
+                  "default": "4"
+                }
+              },
+              "children": [
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20style%3D%22height%3A19px%3B%22%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-secao%22%3EResumo%20do%20perfil%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-campo%22%3E%3Cdiv%20class%3D%22c-hdr-label%22%3ECliente%20desde%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%20c-hdr-valor-forte%22%3E%7BclienteDesde%7D%3C/div%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-campo%22%3E%3Cdiv%20class%3D%22c-hdr-label%22%3ESegmento%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%22%3E%7Bsegmento%7D%3C/div%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-campo%22%3E%3Cdiv%20class%3D%22c-hdr-label%22%3EEstado%20civil%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%20c-hdr-valor-forte%22%3E%7BestadoCivil%7D%3C/div%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-campo%22%3E%3Cdiv%20class%3D%22c-hdr-label%22%3ERating%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%20c-hdr-valor-forte%20c-hdr-verde%22%3E%7Brating%7D%3C/div%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-campo%22%3E%3Cdiv%20class%3D%22c-hdr-label%22%3EFilhos%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%20c-hdr-valor-forte%22%3E%7Bfilhos%7D%3C/div%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-campo%22%3E%3Cdiv%20class%3D%22c-hdr-label%22%3ECadastro%20completo%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%20c-hdr-valor-forte%20c-hdr-verde%22%3E%7Bcompletude%7D%3C/div%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Block",
+              "element": "block",
+              "size": {
+                "isResponsive": false,
+                "default": "4"
+              },
+              "stateIndex": 0,
+              "class": "slds-col ",
+              "property": {
+                "label": "Block",
+                "collapsible": false,
+                "record": "{record}",
+                "collapsedByDefault": false,
+                "card": "{card}"
+              },
+              "type": "block",
+              "styleObject": {
+                "padding": [
+                  {
+                    "type": "around",
+                    "size": "x-small"
+                  }
+                ],
+                "class": "slds-p-around_x-small ",
+                "sizeClass": "slds-size_4-of-12 ",
+                "size": {
+                  "isResponsive": false,
+                  "default": "4"
+                }
+              },
+              "children": [
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-label%22%3ERespons%C3%A1vel%3C/div%3E%3Cdiv%20class%3D%22c-hdr-mt-sm%22%3E%3Cspan%20class%3D%22c-hdr-avatar%22%3E%7BresponsavelIniciais%7D%3C/span%3E%3Cspan%20class%3D%22c-hdr-resp-nome%22%3E%7Bresponsavel%7D%3C/span%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-secao%22%3ENecessidades%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-campo%22%3E%3Cdiv%20class%3D%22c-hdr-label%22%3ESegmento%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%20c-hdr-valor-forte%22%3E%7Bnecessidade%7D%3C/div%3E%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-label%20c-hdr-mt-md%22%3EEtapa%20da%20jornada%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%20c-hdr-valor-forte%20c-hdr-mt-sm%22%3E%7Bjornada%7D%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                },
+                {
+                  "name": "Text",
+                  "element": "outputField",
+                  "size": {
+                    "isResponsive": false,
+                    "default": "12"
+                  },
+                  "stateIndex": 0,
+                  "class": "slds-col ",
+                  "property": {
+                    "record": "{record}",
+                    "mergeField": "%3Cdiv%20class%3D%22c-hdr-label%20c-hdr-mt-md%22%3ECanais%20preferidos%3C/div%3E%3Cdiv%20class%3D%22c-hdr-valor%20c-hdr-mt-sm%22%3E%7Bcanais%7D%3C/div%3E",
+                    "card": "{card}"
+                  },
+                  "type": "text",
+                  "styleObject": {
+                    "padding": [
+                      {
+                        "type": "around",
+                        "size": "x-small"
+                      }
+                    ],
+                    "class": "slds-p-around_x-small ",
+                    "sizeClass": "slds-size_12-of-12 "
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "childCards": [],
+      "actions": [],
+      "omniscripts": [],
+      "documents": []
+    }
+  ],
+  "dataSource": {
+    "type": "ApexRemote",
+    "value": {
+      "dsDelay": "",
+      "remoteClass": "Visao360FlexCardDS",
+      "remoteMethod": "getHeader",
+      "vlocityAsync": false,
+      "inputMap": {
+        "recordId": "{recordId}"
+      },
+      "jsonMap": "{\"recordId\":\"{recordId}\"}",
+      "resultVar": ""
+    },
+    "orderBy": {
+      "name": "",
+      "isReverse": ""
+    },
+    "contextVariables": [
+      {
+        "name": "recordId",
+        "val": "",
+        "id": 1
+      }
+    ]
+  },
+  "title": "Identificação do Cliente",
+  "enableLwc": true,
+  "isFlex": true,
+  "theme": "slds",
+  "selectableMode": "Multi",
+  "accessibilityToggle": false,
+  "offlineEnabled": false,
+  "xmlObject": {
+    "masterLabel": "visaoHeader360",
+    "isExposed": true,
+    "apiVersion": 61
+  },
+  "xmlJson": [
+    {
+      "@attributes": {
+        "targets": "lightning__RecordPage"
+      }
+    },
+    {
+      "@attributes": {
+        "targets": "lightning__AppPage"
+      }
+    }
+  ],
+  "events": [],
+  "globalCSS": "",
+  "osSupport": false,
+  "listenToWidthResize": false
+}
