@@ -1,0 +1,55 @@
+OR(
+AND(
+ISPICKVAL(PRIORVALUE (Status__c), "Em elaboração"),
+NOT(ISPICKVAL (Status__c, "Em precificação"))
+),
+AND(
+ISPICKVAL(PRIORVALUE (Status__c), "Em precificação"),
+OR(
+ISPICKVAL (Status__c, "Proposta liberada"),
+ISPICKVAL (Status__c, "Proposta aceita"),
+ISPICKVAL (Status__c, "Em contrato"),
+ISPICKVAL (Status__c, "Concluido"),
+ISPICKVAL (Status__c, "Proposta não aceita"),
+ISPICKVAL (Status__c, "Cancelado")
+)),
+AND(
+ISPICKVAL(PRIORVALUE (Status__c), "Em análise comercial"),
+OR(
+ISPICKVAL (Status__c, "Proposta aceita"),
+ISPICKVAL (Status__c, "Em contrato"),
+ISPICKVAL (Status__c, "Concluido"),
+ISPICKVAL (Status__c, "Proposta não aceita"),
+PICKLIST DE STATUS
+
+SÓ PERMITE CAMINHAR PARA FRENTE EM UM PATH PARA O PRÓXIMO VALOR, E VOLTAR PARA TODOS ANTERIORES
+
+
+
+ISPICKVAL (Status__c, "Cancelado")
+)),
+AND(
+ISPICKVAL(PRIORVALUE (Status__c), "Proposta liberada"),
+OR(
+ISPICKVAL (Status__c, "Em contrato"),
+ISPICKVAL (Status__c, "Concluido"),
+ISPICKVAL (Status__c, "Proposta não aceita"),
+ISPICKVAL (Status__c, "Cancelado")
+)),
+AND(
+ISPICKVAL(PRIORVALUE (Status__c), "Proposta aceita"),
+OR(
+ISPICKVAL (Status__c, "Concluido"),
+ISPICKVAL (Status__c, "Proposta não aceita"),
+ISPICKVAL (Status__c, "Cancelado")
+)),
+AND(
+ISPICKVAL(PRIORVALUE (Status__c), "Em contrato"),
+OR(
+ISPICKVAL (Status__c, "Proposta não aceita"),
+ISPICKVAL (Status__c, "Cancelado")
+)),
+AND(
+ISPICKVAL(PRIORVALUE (Status__c), "Concluido"),
+ISPICKVAL (Status__c, "Cancelado")
+))

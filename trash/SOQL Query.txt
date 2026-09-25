@@ -1,0 +1,196 @@
+https://salesforcecodex.com/salesforce/getting-salesforce-licenses-information/
+
+Users da org
+
+Select Id, Name, Email, Department, Division, ManagerId, Centro_de_Custo__c, IsActive, Profile.Name, UserRoleId, Profile.UserLicense.Name 
+From User 
+Where IsActive = true
+
+
+Contatos de Colaborador
+
+SELECT Id, Name, FirstName, LastName, Email, Birthdate, CPF__c, CPFPontuado__c, RG__c, MailingAddress, Matricula__c, Status__c, Owner.Name, Owner.Email, Owner.IsActive FROM Contact WHERE RecordType.Name = 'Funcionário'
+
+
+
+Licenças Salesforce
+
+Select Id, Name, Department, Division, IsActive, Profile.UserLicense.Name 
+From User 
+Where Profile.UserLicense.Name = 'Salesforce' AND IsActive = true
+
+
+Licenças Salesforce Platform
+
+Select Id, Name, Department, Division, IsActive, Profile.UserLicense.Name 
+From User 
+Where Profile.UserLicense.Name = 'Salesforce Platform' AND IsActive = true
+
+
+Licenças Company Communities
+
+
+Select Id, Name, Department, Division, IsActive, Profile.UserLicense.Name 
+From User 
+Where Profile.UserLicense.Name LIKE '%Company%' AND IsActive = true
+
+
+Licenças Partner Community
+
+Select Id, Name, Department, Division, IsActive, Profile.UserLicense.Name 
+From User 
+Where Profile.UserLicense.Name = 'Partner Community' AND IsActive = true
+
+
+SELECT Count(Id) UserCount, Profile.UserLicense.Name FROM User GROUP BY Profile.UserLicense.Name
+
+
+
+Permission Set
+
+SELECT PermissionSetLicense.MasterLabel, PermissionSetLicenseAssign.AssigneeId 
+FROM PermissionSetLicenseAssign
+
+User
+
+SELECT Department,Division,FirstName,Id,IsActive,LastName,Name,ProfileId,UserRoleId,UserType FROM User
+
+
+User Permission Set
+
+SELECT Name, Id, LastLoginDate FROM User WHERE Id IN (SELECT AssigneeId FROM PermissionSetLicenseAssign WHERE PermissionSetLicense.MasterLabel ='myTrailhead') AND IsActive=true ORDER BY Name
+
+
+User Permission Set by Role
+
+SELECT Id, PermissionSet.Name, PermissionSet.Label,  PermissionSet.Type, AssigneeId, Assignee.Name, Assignee.UserRole.Name, Assignee.Profile.Name, Assignee.Profile.UserLicense.Name from PermissionSetAssignment WHERE Assignee.UserRole.Name LIKE '%Salesforce%' AND Assignee.IsActive=true ORDER BY Assignee.Name
+
+
+User Permission Set License by Role
+
+SELECT Id, PermissionSetLicense.DeveloperName, PermissionSetLicenseId, AssigneeId, Assignee.Name, Assignee.UserRole.Name, Assignee.Profile.Name, Assignee.Profile.UserLicense.Name from PermissionSetLicenseAssign  WHERE Assignee.UserRole.Name LIKE '%Salesforce%' AND Assignee.IsActive=true ORDER BY Assignee.Name
+
+
+Permission Set License
+
+
+
+
+
+Feature Licenses
+
+Chat
+
+Select Id, Name, Department, Division, IsActive, Profile.UserLicense.Name 
+From User where UserPermissionsLiveAgentUser=true and isActive=true
+
+
+Knowledge 
+
+Select Id, Name, Department, Division, IsActive, Profile.UserLicense.Name
+From User where UserPermissionsKnowledgeUser=true and isActive=true
+
+
+Marketing
+
+Select Id, Name, Department, Division, IsActive, Profile.UserLicense.Name
+From User where UserPermissionsMarketingUser=true and isActive=true
+
+
+Flow
+
+Select Id, Name, Department, Division, IsActive, Profile.UserLicense.Name
+From User where UserPermissionsInteractionUser=true and isActive=true
+
+
+Service Cloud
+
+Select Id, Name, Department, Division, IsActive, Profile.UserLicense.Name
+From User where UserPermissionsSupportUser=true and isActive=true
+
+
+myTrailhead
+
+SELECT PermissionSetLicense.MasterLabel, PermissionSetLicenseAssign.AssigneeId, Assignee.Name 
+FROM PermissionSetLicenseAssign WHERE PermissionSetLicense.MasterLabel= 'myTrailhead'
+
+
+Inbox
+
+SELECT PermissionSetLicense.MasterLabel, Assignee.Name, PermissionSetLicenseAssign.AssigneeId
+FROM PermissionSetLicenseAssign WHERE PermissionSetLicense.MasterLabel= 'Inbox'
+
+
+Sales Console User
+
+SELECT PermissionSetLicense.MasterLabel, Assignee.Name, PermissionSetLicenseAssign.AssigneeId
+FROM PermissionSetLicenseAssign where PermissionSetLicense.MasterLabel = 'Sales Console User'
+
+
+Managed Packages License
+
+
+SELECT Id, PackageLicenseId, UserId, PackageLicense.NamespacePrefix FROM UserPackageLicense
+
+
+
+Multiplos valores
+
+Select Id, Name, LastLoginDate , UserRole.Name, Profile.UserLicense.Name, title, CompanyName, Department, Division, Manager.Name
+From User 
+Where Profile.UserLicense.Name in ('Partner Community', 'Salesforce Platform')  AND IsActive = true AND CompanyName = '[ kolekto ]'	
+ORDER BY Name ASC
+
+
+Query  pagamentos:
+
+Select Id, Name, descricao__c, CreatedDate
+From acerto_despesa__c
+Where Name in ('AD-23436')
+
+Query Time Split
+
+SELECT Id, Name, RegistroMes__r.Name, RegistroMes__r.timesheet__r.Name from TimeSplit__c WHERE RegistroMes__r.timesheet__r.Owner.Name LIKE '%Helton%' AND RegistroMes__r.Name LIKE '%8/2021%'
+
+
+Query feriados:
+
+
+SELECT Name, ActivityDate, StartTimeInMinutes, EndTimeInMinutes, IsAllDay, IsRecurrence, RecurrenceStartDate, RecurrenceEndDateOnly, RecurrenceType, RecurrenceInterval, RecurrenceDayOfWeekMask, RecurrenceDayOfMonth, RecurrenceMonthOfYear 
+FROM Holiday
+
+
+Reports in Dashboards
+
+Select Id,Dashboard.DeveloperName,Dashboard.Id,Dashboard.FolderName,Dashboard.title,CustomReportId from DashboardComponent where CustomReportId In (Select Id from Report where DeveloperName in ('ReportId_1'))
+
+
+Reports in Dashboards - Private
+
+Select id,title,CreatedById,CreatedBy.Name,DeveloperName, FolderName,CreatedBy.isActive,CreatedDate from  Dashboard using scope allprivate where Id IN (Select DashboardId from DashboardComponent USING SCOPE allPrivate where CustomReportId In ('ReportId_1','ReportId_2','ReportId_3'))
+
+
+Query List View
+
+SELECT Id, Name, DeveloperName, NamespacePrefix, SobjectType, IsSoqlCompatible, CreatedDate, CreatedBy.Name, LastModifiedDate, LastModifiedBy.Name, LastViewedDate, LastReferencedDate FROM ListView
+
+
+
+01 minuto - 1/24/60 = 0,000694444
+
+
+
+Value in Formula	Minutes Ago		Will Fire In	
+ 0.04145		60	Minutes		0	Minutes
+ 0.03800		55	Minutes		5	Minutes
+ 0.03455		50	Minutes		10	Minutes
+ 0.03109		45	Minutes		15	Minutes
+ 0.02764		40	Minutes		20	Minutes
+ 0.02418		35	Minutes		25	Minutes
+ 0.02073		30	Minutes		30	Minutes
+ 0.01727		25	Minutes		35	Minutes
+ 0.01382		20	Minutes		40	Minutes
+ 0.01036		15	Minutes		45	Minutes
+ 0.00691		10	Minutes		50	Minutes
+ 0.00345		5	Minutes		55	Minutes
+ 0.00069		1	Minute		59	Minutes

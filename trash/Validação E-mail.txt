@@ -1,0 +1,1 @@
+NOT(REGEX( CampoDeEmail__c,"[a-zA-Z0-9.-]+@[a-zA-Z]+.+[a-zA-Z]{1,4}"))
