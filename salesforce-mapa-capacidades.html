@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa de Capacidades Salesforce</title>
+<style>
+:root{
+  --bg:#f4f5f7; --panel:#fff; --ink:#1c2430; --mute:#5d6877; --line:#d9dde3;
+  --n-bg:#e6e8ec; --n-bd:#c7ccd4; --n-ink:#3b4552;
+  --g-bg:#d3f0de; --g-bd:#2e9e5b; --g-ink:#0f4a29;
+  --y-bg:#fcefbd; --y-bd:#d9a50b; --y-ink:#5a4200;
+  --acc:#0b5cab; --shadow:0 1px 2px rgba(20,30,50,.08),0 4px 14px rgba(20,30,50,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12161c; --panel:#1b212a; --ink:#e8ecf2; --mute:#9aa6b6; --line:#2d3643;
+    --n-bg:#2a313b; --n-bd:#454f5e; --n-ink:#c9d1dc;
+    --g-bg:#16452b; --g-bd:#3cc27a; --g-ink:#c9f3da;
+    --y-bg:#4a3a07; --y-bd:#e3b520; --y-ink:#fbe7a0;
+    --acc:#5aa9f0; --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12161c; --panel:#1b212a; --ink:#e8ecf2; --mute:#9aa6b6; --line:#2d3643;
+  --n-bg:#2a313b; --n-bd:#454f5e; --n-ink:#c9d1dc;
+  --g-bg:#16452b; --g-bd:#3cc27a; --g-ink:#c9f3da;
+  --y-bg:#4a3a07; --y-bd:#e3b520; --y-ink:#fbe7a0;
+  --acc:#5aa9f0; --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.top{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.top h1{font-size:18px;margin:0;flex:1 1 260px}
+.top h1 small{display:block;font-weight:400;color:var(--mute);font-size:12.5px}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 12px;font-size:13.5px}
+.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.dng{color:#c0392b}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.kpis{display:flex;flex-wrap:wrap;gap:10px;padding:14px 16px 0}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:130px;box-shadow:var(--shadow)}
+.kpi b{font-size:24px;display:block;line-height:1.1}
+.kpi span{font-size:12px;color:var(--mute)}
+.kpi.g{border-left:5px solid var(--g-bd)}.kpi.y{border-left:5px solid var(--y-bd)}.kpi.n{border-left:5px solid var(--n-bd)}
+.bar{flex:1 1 260px;display:flex;flex-direction:column;justify-content:center;gap:6px;min-width:220px}
+.bar .track{height:12px;border-radius:8px;overflow:hidden;display:flex;background:var(--n-bd)}
+.bar .track i{display:block;height:100%;transition:width .4s}
+.bar small{color:var(--mute);font-size:12px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px}
+.tools input[type=search]{flex:1 1 220px;max-width:340px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 10px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px;font-size:13px;display:inline-flex;gap:6px;align-items:center}
+.chip[aria-pressed="true"]{outline:2px solid var(--acc)}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block;border:2px solid var(--n-bd);background:var(--n-bg)}
+.dot.u{border-color:var(--g-bd);background:var(--g-bd)}.dot.p{border-color:var(--y-bd);background:var(--y-bd)}
+.lanes{padding:0 16px 40px;display:flex;flex-direction:column;gap:16px}
+.lane{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.lane-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);border-left:6px solid var(--lc,var(--acc))}
+.lane-h h2{margin:0;font-size:17px;flex:1 1 200px}
+.lane-h h2 small{font-weight:400;color:var(--mute);font-size:12.5px;margin-left:8px}
+.lane-h .mini{font-size:12.5px;color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;padding:14px 16px 16px;min-height:80px}
+.grid.over{background:rgba(11,92,171,.07)}
+.card{position:relative;text-align:left;border:1.5px solid var(--n-bd);background:var(--n-bg);color:var(--n-ink);border-radius:10px;padding:10px 12px 9px;display:flex;flex-direction:column;gap:6px;min-height:74px;transition:transform .12s,box-shadow .12s}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.card.u{background:var(--g-bg);border-color:var(--g-bd);color:var(--g-ink)}
+.card.p{background:var(--y-bg);border-color:var(--y-bd);color:var(--y-ink)}
+.card .nm{font-weight:600;font-size:13.5px;line-height:1.3;padding-right:20px}
+.card .ft{display:flex;justify-content:space-between;align-items:center;margin-top:auto;gap:6px}
+.tag{font-size:10.5px;letter-spacing:.02em;text-transform:uppercase;border:1px solid currentColor;border-radius:999px;padding:1px 7px;opacity:.8;white-space:nowrap}
+.card .st{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;border:2px solid currentColor;background:transparent;padding:0;opacity:.85}
+.card.u .st{background:var(--g-bd);border-color:var(--g-bd)}
+.card.p .st{background:linear-gradient(90deg,var(--y-bd) 50%,transparent 50%);border-color:var(--y-bd)}
+.card .who{font-size:11.5px;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card.dragging{opacity:.4}
+.card.hide{display:none}
+.add{border:1.5px dashed var(--n-bd);background:transparent;color:var(--mute);border-radius:10px;min-height:74px;font-size:14px}
+.add:hover{border-color:var(--acc);color:var(--acc)}
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,15,25,.45);z-index:50;display:none}
+.scrim.on{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--panel);z-index:60;transform:translateX(105%);transition:transform .25s;box-shadow:-10px 0 30px rgba(0,0,0,.25);display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.dh{padding:16px 18px 12px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:flex-start}
+.dh input{flex:1;font-size:18px;font-weight:700;border:1px solid transparent;background:transparent;border-radius:8px;padding:4px 6px}
+.dh input:hover,.dh input:focus{border-color:var(--line);outline:none}
+.db{padding:14px 18px 24px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:14px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1 1 0;border:1.5px solid var(--n-bd);background:var(--n-bg);color:var(--n-ink);border-radius:8px;padding:8px 6px;font-size:13.5px;min-width:100px}
+.seg button[data-v="u"]{border-color:var(--g-bd);background:var(--g-bg);color:var(--g-ink)}
+.seg button[data-v="p"]{border-color:var(--y-bd);background:var(--y-bg);color:var(--y-ink)}
+.seg button[aria-pressed="false"]{opacity:.45}
+.seg button[aria-pressed="true"]{outline:2.5px solid var(--acc);font-weight:700}
+.fld label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);margin-bottom:4px}
+.fld textarea,.fld input,.fld select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;resize:vertical}
+.fld textarea{min-height:76px}
+.fld .hint{font-size:12px;color:var(--mute);margin-top:3px}
+.use{background:var(--g-bg);border:1px solid var(--g-bd);border-radius:10px;padding:10px 12px;color:var(--g-ink)}
+.use .fld label{color:inherit}
+.use .fld textarea,.use .fld input{background:var(--panel);color:var(--ink)}
+.df{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+/* deck */
+#deck{position:fixed;inset:0;background:var(--bg);z-index:40;display:none;flex-direction:column}
+body.present #deck{display:flex}
+body.present .app{display:none}
+.dk-top{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel);gap:8px;flex-wrap:wrap}
+.dk-body{flex:1;overflow:auto;padding:24px clamp(16px,4vw,56px)}
+.dk-body h2{font-size:clamp(22px,3.2vw,36px);margin:0 0 4px}
+.dk-body p.sub{color:var(--mute);margin:0 0 18px;max-width:80ch}
+.dk-body .grid{padding:0;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.dk-body .card{min-height:90px}
+.dk-body .card .nm{font-size:15px}
+.cover{height:100%;display:flex;flex-direction:column;justify-content:center;max-width:900px}
+.cover h1{font-size:clamp(30px,5vw,56px);line-height:1.1;margin:0 0 12px}
+.cover .rule{display:flex;gap:6px;margin:18px 0}
+.cover .rule i{width:56px;height:8px;border-radius:5px;display:block}
+.sum3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.sumc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);border-top:6px solid var(--lc)}
+.sumc h3{margin:0 0 8px}
+.sumc .big{font-size:40px;font-weight:700;line-height:1}
+.opp{columns:3 280px;column-gap:18px}
+.opp h4{margin:14px 0 6px;break-after:avoid}
+.opp li{margin:0 0 5px}
+.foot{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:6px 16px;font-size:12px;color:var(--mute);display:none}
+.note{margin:0 16px 14px;font-size:12.5px;color:var(--mute);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:90;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+@media print{
+  .top,.tools,.add,.drawer,.scrim,.actions,.card .st{display:none!important}
+  body{background:#fff}
+  .card{break-inside:avoid;transform:none!important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1 id="ttl">Mapa de Capacidades Salesforce<small>Service Cloud Enterprise / Unlimited · Banco: cartão, conta digital, consórcio e investimentos · RASCUNHO – validar contra o contrato (order form)</small></h1>
+    <div class="actions">
+      <button class="btn pri" id="bPres">▶ Apresentar</button>
+      <button class="btn" id="bExp">Exportar JSON</button>
+      <button class="btn" id="bImp">Importar JSON</button>
+      <button class="btn" id="bPrint">Imprimir / PDF</button>
+      <button class="btn dng" id="bReset">Restaurar padrão</button>
+      <input type="file" id="file" accept="application/json" hidden>
+    </div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="note">
+    <b>Como usar:</b> clique em um bloco para ver a explicação e editar. O círculo no canto do bloco alterna <b>cinza → verde (em uso) → amarelo (parcial)</b>. Arraste blocos para reordenar ou mover entre raias. Tudo é salvo automaticamente neste navegador; use <b>Exportar JSON</b> para guardar ou compartilhar.
+    A etiqueta de licença (Incluso / Unlimited / Add-on / Validar) vem de fontes públicas e <b>não substitui</b> a conferência do contrato da sua ORG; a Salesforce renomeou edições em 2026 (Core / Advanced / Max), então confirme com seu Account Executive.
+  </div>
+
+  <div class="tools">
+    <input type="search" id="q" placeholder="Buscar capacidade…">
+    <button class="chip" data-f="all" aria-pressed="true">Todos</button>
+    <button class="chip" data-f="u" aria-pressed="false"><span class="dot u"></span>Em uso</button>
+    <button class="chip" data-f="p" aria-pressed="false"><span class="dot p"></span>Parcial</button>
+    <button class="chip" data-f="n" aria-pressed="false"><span class="dot"></span>Disponível (oportunidade)</button>
+    <button class="btn" id="bTheme" title="Alternar tema">◐</button>
+  </div>
+
+  <main class="lanes" id="lanes"></main>
+</div>
+
+<div id="deck">
+  <div class="dk-top">
+    <div id="dkInfo"></div>
+    <div class="actions">
+      <button class="btn" id="dkPrev">← Anterior</button>
+      <button class="btn" id="dkNext">Próximo →</button>
+      <button class="btn" id="dkExit">✕ Sair (Esc)</button>
+    </div>
+  </div>
+  <div class="dk-body" id="dkBody"></div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="dh">
+    <input id="fNome" aria-label="Nome da capacidade">
+    <button class="btn" id="dClose">✕</button>
+  </div>
+  <div class="db">
+    <div class="fld">
+      <label>Situação na ORG</label>
+      <div class="seg" id="fSt">
+        <button data-v="n">Disponível, não usado</button>
+        <button data-v="p">Parcialmente em uso</button>
+        <button data-v="u">Em uso</button>
+      </div>
+    </div>
+    <div class="use" id="useBox">
+      <div class="fld"><label>Onde e como é usado hoje</label>
+        <textarea id="fUso" placeholder="Ex.: Fila de Cartões no console; casos de bloqueio chegam por e-mail e são roteados por Omni-Channel."></textarea></div>
+      <div class="fld" style="margin-top:8px"><label>Área / responsável</label><input id="fResp" placeholder="Ex.: Atendimento Cartões – Maria"></div>
+    </div>
+    <div class="fld"><label>O que é (linguagem simples)</label><textarea id="fOque"></textarea></div>
+    <div class="fld"><label>Exemplo de uso no banco</label><textarea id="fCaso"></textarea></div>
+    <div class="fld"><label>Licença (fonte pública – validar no contrato)</label>
+      <select id="fLic">
+        <option value="inc">Incluso na licença Enterprise</option>
+        <option value="unl">Incluso no Unlimited (add-on no Enterprise)</option>
+        <option value="add">Add-on / licença adicional</option>
+        <option value="ver">Validar no contrato</option>
+      </select></div>
+    <div class="fld"><label>Raia</label><select id="fLane"></select></div>
+    <div class="fld"><label>Notas internas</label><textarea id="fNotas" placeholder="Pendências, ideias, donos de decisão…"></textarea></div>
+  </div>
+  <div class="df">
+    <button class="btn dng" id="dDel">Excluir bloco</button>
+    <button class="btn pri" id="dOk">Concluir</button>
+  </div>
+</aside>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+var KEY="sf-mapa-capacidades-v1";
+var LIC={inc:"Incluso",unl:"Unlimited",add:"Add-on",ver:"Validar"};
+var ST={n:"Disponível",u:"Em uso",p:"Parcial"};
+
+function I(nome,lic,oque,caso){return {nome:nome,lic:lic,oque:oque,caso:caso};}
+
+var DEFAULT=[
+{id:"cross",nome:"Cross Platform",sub:"serve a plataforma inteira",cor:"#6d4cc2",itens:[
+I("Cadastro do cliente: Contas, Contatos e Person Accounts","inc","É a ‘ficha’ central de cada cliente. Com Person Account, uma pessoa física é tratada como cliente direto, sem precisar de empresa por trás.","Um único cadastro do cliente com CPF, cartões, conta digital, consórcio e investimentos, visível para todas as áreas em vez de cada produto ter sua própria ficha."),
+I("Objetos e campos personalizados","inc","Permite criar suas próprias fichas e campos, além dos que já vêm prontos, sem programar. O Unlimited comporta bem mais objetos que o Enterprise (referência pública: 2.000 vs 200).","Criar ‘Cota de Consórcio’, ‘Cartão’ e ‘Posição de Investimento’ com os campos próprios de cada produto (grupo, cota, bandeira, limite, perfil de investidor)."),
+I("Flow Builder (automação sem código)","inc","Cria ‘robôs’ de processo arrastando e soltando blocos: o sistema faz sozinho tarefas repetitivas, como avisar, criar tarefas e atualizar dados.","Ao abrir um caso de ‘cartão clonado’, o robô bloqueia a solicitação, avisa o time de fraude e manda uma mensagem de acolhimento ao cliente."),
+I("Aprovações e Flow Orchestration","inc","Fluxos com várias etapas e aprovadores, com prazos e responsáveis em cada etapa.","Estorno de tarifa acima de determinado valor precisa de aprovação do coordenador; exceção de limite do cartão vai para a área de crédito."),
+I("Páginas e telas sob medida (Lightning App Builder)","inc","Monta telas diferentes para cada perfil, mostrando só o que é útil para aquela função.","Tela do atendente com dados do cliente e últimos contatos; tela do gerente de investimentos com a carteira e metas."),
+I("Relatórios e Dashboards","inc","Relatórios e painéis visuais atualizados em tempo real, que qualquer área pode montar e assinar por e-mail.","Painel diário com tempo de atendimento, cartões bloqueados, propostas de consórcio abertas e reclamações por canal."),
+I("Segurança e controle de acesso","inc","Define quem vê e edita o quê: por cargo, equipe, registro e até campo individual.","Atendente vê dados cadastrais mas não a carteira de investimentos; só o gerente responsável enxerga o patrimônio do cliente. Apoia a LGPD."),
+I("Histórico de campos e trilha de auditoria","inc","Registra quem alterou o quê e quando, em campos escolhidos e nas configurações do sistema.","Mostrar ao auditor quem mudou o limite, o e-mail ou o telefone cadastral de um cliente e em que data."),
+I("Salesforce Shield (criptografia, monitoramento, auditoria longa)","add","Pacote de segurança extra: criptografa dados sensíveis, monitora acessos suspeitos e guarda histórico por muitos anos.","Criptografar CPF e renda; alertar se alguém exportar milhares de clientes de uma vez."),
+I("APIs e integrações em tempo real","inc","Portas que permitem ao Salesforce conversar com outros sistemas (core bancário, cobrança, app). Existem limites diários por edição.","Mostrar no atendimento o saldo da conta digital que vem do core; enviar a contratação de consórcio direto ao sistema de cobrança."),
+I("Credenciais Nomeadas e Serviços Externos","inc","Guardam com segurança o acesso a sistemas externos e deixam usá-los nos fluxos sem escrever código.","Consultar a situação de um boleto ou o score de um parceiro dentro de um fluxo de atendimento."),
+I("Salesforce Connect (dados externos sem copiar)","add","Exibe dados de outro sistema como se estivessem no Salesforce, sem duplicá-los.","Ver o extrato do cartão direto do sistema legado, sem guardar cópia de dado sensível."),
+I("MuleSoft (plataforma de integração)","add","Plataforma robusta para conectar muitos sistemas, com controle e monitoramento central.","Conectar core bancário, antifraude, cobrança e app em um único ‘barramento’ reutilizável."),
+I("Sandboxes e DevOps Center","unl","Ambientes de teste cópia da produção, para homologar mudanças antes de ir ao ar. O Unlimited inclui sandbox completa (Full); o DevOps Center organiza as entregas.","Testar uma nova regra de roteamento de reclamações com dados reais antes de liberar para todo o atendimento."),
+I("Desenvolvimento sob medida (Apex e LWC)","inc","Para o que não dá para fazer sem código, o time técnico programa regras e componentes próprios.","Componente que calcula e exibe a simulação de parcela de consórcio dentro da tela do cliente."),
+I("AppExchange (loja de aplicativos)","ver","Loja com aplicativos prontos de parceiros, que se instalam na ORG. Os apps são pagos à parte.","Instalar solução de assinatura eletrônica para contratos de consórcio ou de pesquisa de satisfação."),
+I("Experience Cloud (portais e sites)","ver","Cria portais para clientes, parceiros ou funcionários ligados aos dados da ORG. Usuários externos exigem licenças próprias.","Portal ‘Minha área’ onde o cliente acompanha chamados e solicitações; portal de correspondentes e corretores de consórcio."),
+I("App móvel Salesforce","inc","Versão do sistema para celular e tablet, com as mesmas telas e dados.","Gerente de relacionamento consulta a ficha do cliente e registra a visita ainda na agência ou na rua."),
+I("E-mail e agenda: Outlook/Gmail + Einstein Activity Capture","inc","Conecta e-mail e calendário ao Salesforce, registrando automaticamente as interações com o cliente.","Reuniões e e-mails do gerente com o cliente aparecem sozinhos na ficha, sem digitação."),
+I("Gestão de duplicidades","inc","Regras que avisam e impedem cadastros repetidos da mesma pessoa.","Evitar dois cadastros do mesmo CPF vindos de canais diferentes (app, agência, site de consórcio)."),
+I("Importação e exportação de dados","inc","Ferramentas para carregar e extrair grandes volumes de dados com segurança.","Carga inicial da base de clientes de consórcio ou atualização em massa de segmentos."),
+I("Next Best Action (próxima melhor ação)","inc","Sugere ao atendente a próxima oferta ou ação mais adequada para aquele cliente, com base em regras.","Durante um atendimento de cartão, sugerir portabilidade de salário ou investimento de reserva, se fizer sentido para o perfil."),
+I("Slack integrado ao Salesforce","ver","Conecta conversas do Slack com registros do Salesforce, permitindo colaborar sobre um cliente ou caso.","Time de fraude e atendimento conversa em um canal dedicado ao caso de um cliente, com dados atualizados na própria conversa."),
+I("Agentforce e IA generativa (Prompt Builder, Trust Layer)","add","Assistentes de IA que respondem, resumem e executam tarefas usando os dados da ORG, com camada de proteção de dados. Em geral é contratação à parte (créditos/licença).","Assistente que resume o histórico do cliente antes do atendimento e redige a resposta para revisão do atendente."),
+I("Data Cloud (dados unificados do cliente)","add","Reúne dados de vários sistemas em uma visão única e permite segmentar e ativar o cliente.","Unir comportamento do app, cartão, consórcio e investimentos para segmentar quem pode receber cada oferta."),
+I("CRM Analytics / Tableau","add","Análises avançadas e previsões sobre os dados, com mais profundidade que os relatórios padrão.","Entender por que clientes de consórcio desistem e quais perfis têm maior risco de cancelamento."),
+I("Premier Success Plan (suporte)","unl","Suporte ampliado da Salesforce, com atendimento prioritário e acesso a especialistas. Citado como incluso no Unlimited em fontes públicas.","Acionar suporte prioritário em incidente que afete o atendimento ao cliente."),
+I("Backup & Recover e Data Mask","add","Backup e restauração dos dados e mascaramento de dados sensíveis em ambientes de teste.","Recuperar dados apagados por engano; testar com dados de clientes mascarados, em linha com a LGPD."),
+I("Financial Services Cloud / Industries (OmniStudio)","add","Produto separado, voltado a bancos, com visão 360 financeira, metas do cliente e processos guiados. Não faz parte do Service/Sales Cloud.","Painel de relacionamento com patrimônio, metas e produtos do cliente para o gerente.")
+]},
+{id:"service",nome:"Service Cloud",sub:"atendimento e suporte ao cliente",cor:"#0b8a7a",itens:[
+I("Gestão de casos","inc","Cada pedido, dúvida ou reclamação do cliente vira um ‘caso’ com dono, prazo, histórico e status.","Cliente reclama de cobrança indevida no cartão: o caso registra tudo, do primeiro contato à solução."),
+I("Console de Serviço","inc","Tela de trabalho do atendente, com várias abas abertas ao mesmo tempo e tudo do cliente em um só lugar.","Atendente fala com o cliente com cadastro, produtos, casos anteriores e conhecimento na mesma tela."),
+I("Omni-Channel (distribuição de trabalho)","inc","Entrega automaticamente cada atendimento ao atendente certo, conforme habilidade, fila e disponibilidade.","Caso de ‘consórcio contemplado’ vai para o especialista; chamado de ‘bloqueio de cartão’ vai para a fila prioritária."),
+I("Filas, regras de atribuição e escalonamento","inc","Regras que definem a fila de cada caso e o que fazer quando o prazo está estourando.","Reclamação sem resposta em 24h sobe para o supervisor; casos de Ouvidoria vão para fila própria."),
+I("Tipos de caso e processos (reclamação, Ouvidoria, SAC)","inc","Permite ter formulários e etapas diferentes por tipo de solicitação, no mesmo sistema.","Fluxo próprio para reclamação regulatória, com campos e prazos exigidos pelo regulador."),
+I("E-mail para caso (Email-to-Case)","inc","E-mails recebidos em endereços do banco viram casos automaticamente, com resposta pelo próprio sistema.","E-mail enviado para atendimento@ do banco vira caso, é classificado e respondido com modelo padrão."),
+I("Formulário web para caso (Web-to-Case)","inc","Formulário no site que cria caso direto no Salesforce.","Cliente preenche ‘Contestar compra’ no site e o caso já nasce com os dados necessários."),
+I("Respostas automáticas e modelos de e-mail","inc","Mensagens padrão enviadas ao abrir ou fechar um caso, ou escolhidas rapidamente pelo atendente.","Confirmação automática com número de protocolo e prazo de resposta."),
+I("Macros e Quick Text","inc","Atalhos que executam várias ações de uma vez e inserem textos prontos nas respostas.","Um clique para responder, registrar motivo e fechar um caso de segunda via de boleto."),
+I("Direitos e SLA (Entitlements e Milestones)","inc","Define o prazo de atendimento que cada cliente ou produto tem direito, com alertas de vencimento.","Cliente Premium com SLA de 2h; reclamação regulatória com prazo legal acompanhado em marcos."),
+I("Salesforce Knowledge (base de conhecimento)","unl","Biblioteca de artigos oficiais, fácil de buscar durante o atendimento e publicável para o cliente. Citado como incluso no Unlimited em fontes públicas.","Atendente acha em segundos o passo a passo de ‘como contestar compra’, ‘quando sai a contemplação’ ou ‘resgate de investimento’."),
+I("Equipes de caso e colaboração (Swarming)","inc","Permite chamar colegas de outras áreas para resolver um caso juntos, inclusive pelo Slack.","Atendimento chama fraude e jurídico para um caso complexo de golpe na conta digital."),
+I("Mensageria digital (WhatsApp, SMS, Chat, redes)","ver","Atendimento por aplicativos de mensagem, no mesmo console e com o mesmo histórico. Em fontes públicas aparece como Digital Engagement (add-on no Enterprise, incluso no Unlimited); confirmar créditos e canais no contrato.","Cliente fala no WhatsApp sobre o limite do cartão e o histórico vira parte do mesmo caso, sem repetir informações."),
+I("Chatbots (Einstein Bots)","unl","Robô que responde dúvidas simples e entrega ao humano quando necessário. Em fontes públicas o Unlimited inclui bots com limite de conversas.","Bot resolve segunda via de fatura, saldo de consórcio e status de proposta, e transfere ao humano em caso complexo."),
+I("Service Cloud Voice (telefonia integrada)","add","Telefonia dentro do console, com gravação e transcrição das ligações.","Ligação do cliente já abre a ficha dele e transcreve a conversa para o caso."),
+I("Open CTI (integração com telefonia existente)","inc","Conecta a central telefônica atual ao console do Salesforce.","Ao atender, a tela do cliente abre sozinha pelo número que ligou."),
+I("Einstein: classificação e recomendação de casos","ver","IA que sugere categoria, prioridade e respostas com base em casos passados. Pode depender de licença de IA; validar.","Classificar automaticamente se o e-mail é fraude, segunda via ou cancelamento e sugerir a resposta."),
+I("Einstein Conversation Insights","unl","Analisa gravações e transcrições para achar temas, riscos e oportunidades nas conversas.","Descobrir o motivo mais comum de cancelamento de consórcio nas ligações."),
+I("Agentforce for Service (agente de IA)","add","Agente de IA que atende o cliente e resolve casos de ponta a ponta, dentro de regras definidas.","Agente resolve sozinho segunda via, limite disponível e status de proposta, 24x7, e escala os demais."),
+I("Central de Ajuda (autoatendimento)","ver","Site de ajuda com artigos e abertura de casos para o cliente se servir sozinho.","Cliente encontra ‘como parcelar a fatura’ sem precisar ligar."),
+I("Pesquisas (Salesforce Surveys)","inc","Pesquisas de satisfação enviadas após o atendimento, ligadas ao caso.","CSAT/NPS após o fechamento de cada caso, vinculado ao atendente e ao produto."),
+I("Fluxos guiados e roteiros de atendimento","inc","Passo a passo dentro da tela que conduz o atendente em processos complexos.","Roteiro de ‘contestação de compra’ com perguntas, validações e envio automático ao time de chargeback."),
+I("Lightning Scheduler (agendamento)","add","Agendamento de reuniões e visitas direto no Salesforce, com a agenda dos especialistas.","Cliente agenda conversa com especialista em investimentos ou consultor de consórcio, em agência ou por vídeo."),
+I("Workforce Engagement e Quality Management","add","Planejamento de escalas e avaliação de qualidade do atendimento.","Dimensionar equipe para pico de fatura e avaliar ligações por amostragem."),
+I("Field Service (atendimento externo)","add","Gestão de visitas externas e equipes de campo.","Entrega de maquininha e visitas técnicas a clientes PJ.")
+]},
+{id:"sales",nome:"Sales Cloud",sub:"vendas e relacionamento comercial",cor:"#c46a1a",itens:[
+I("Leads (potenciais clientes) e conversão","inc","Registra quem demonstrou interesse e acompanha até virar cliente com oportunidade.","Pessoa simula consórcio no site; vira lead, é qualificada e convertida em cliente com oportunidade."),
+I("Web-to-Lead e regras de atribuição de leads","inc","Formulários do site que criam leads e regras que os distribuem ao time certo.","Lead de ‘abra sua conta digital’ vai para a equipe digital; lead de investimentos vai para o assessor."),
+I("Campanhas","inc","Organiza ações de marketing e mostra quanto cada uma gerou de resultado.","Campanha de migração de cartão: quantos receberam, responderam e contrataram."),
+I("Oportunidades e funil de vendas","inc","Cada possível venda tem valor, etapa, data prevista e responsável.","Venda de consórcio imobiliário de R$ 300 mil com etapa, data de fechamento e probabilidade."),
+I("Sales Path e Kanban de pipeline","inc","Guia visual com as etapas da venda e dicas do que fazer em cada uma, com visão em quadro.","Em ‘proposta enviada’, lembrar de anexar simulação e validar documentos."),
+I("Produtos e Listas de Preço","inc","Catálogo de produtos e preços que alimenta oportunidades e cotações.","Catálogo com planos de consórcio, anuidades de cartão e taxas de produtos de investimento."),
+I("Cotações e propostas","inc","Gera propostas formais a partir da oportunidade, com itens e condições.","Proposta de consórcio com prazo, crédito, taxa administrativa e parcela."),
+I("Contratos e Pedidos","inc","Controla contratos assinados e pedidos gerados da venda.","Acompanhar vigência e adesão do cliente a cada contrato de produto."),
+I("Previsão de vendas (Forecasting)","inc","Consolida o que o time espera vender por período, com ajustes do gestor.","Diretoria vê a previsão mensal de novas cotas de consórcio e contas abertas por região."),
+I("Gestão de territórios","inc","Divide carteiras por região, segmento ou tipo de cliente de forma automática.","Carteiras por agência e segmento (alta renda, varejo, PJ) com regras claras."),
+I("Equipes de conta e de oportunidade","inc","Várias pessoas atuando no mesmo cliente ou venda, cada uma com seu papel.","Gerente, assessor de investimentos e especialista de consórcio juntos no mesmo cliente."),
+I("Atividades: tarefas, eventos e calendário","inc","Agenda de contatos e tarefas ligadas ao cliente ou à venda.","Lembrete para o gerente ligar ao cliente quando o consórcio estiver perto da contemplação."),
+I("Pipeline Inspection","unl","Visão avançada do funil que destaca oportunidades paradas ou em risco. Em fontes públicas, parte dos recursos de IA/insights pode exigir licença; validar.","Gestor identifica propostas de consórcio sem movimento há 15 dias."),
+I("Pontuação por IA de leads e oportunidades","ver","IA que indica quais leads e oportunidades têm maior chance de fechar. Pode depender de licença de IA; validar.","Priorizar a ligação para quem tem mais chance de contratar investimento."),
+I("Sales Engagement (cadências de contato)","ver","Roteiros automáticos de contatos (ligação, e-mail, tarefa) em dias definidos. Em fontes públicas consta incluso no Unlimited; validar.","Cadência de 14 dias para quem simulou consórcio e não finalizou a proposta."),
+I("Insights de relacionamento","ver","Mostra a força do relacionamento e quem na empresa conhece o cliente.","Ver quais gerentes já interagiram com uma empresa cliente PJ."),
+I("Hierarquia de contas (grupos e famílias)","inc","Liga contas relacionadas em uma estrutura: matriz e filiais, ou família.","Visão consolidada de um grupo familiar com cartões, consórcios e investimentos."),
+I("Salesforce Maps","add","Mapas para planejar visitas e entender onde estão os clientes.","Rota de visitas do gerente a clientes PJ do bairro."),
+I("Revenue Intelligence","add","Análises e previsões avançadas de receita, com alertas de risco.","Diretoria acompanha risco de não atingir meta trimestral de captação."),
+I("Salesforce CPQ / Revenue Cloud","add","Configuração de preços, regras comerciais e propostas complexas.","Precificar pacotes com regras de desconto e aprovações para clientes PJ."),
+I("Agentforce for Sales","add","Agente de IA que apoia a venda: prepara reuniões, redige e-mails e resume contas.","Resumo da conta e rascunho de e-mail de oferta antes da visita do gerente."),
+I("Sales Dialer (discador)","add","Ligações a partir do Salesforce, com gravação e registro automático.","Time de televendas liga para a carteira de consórcio e registra tudo sem digitar."),
+I("Account Engagement (automação de marketing)","add","Automatiza marketing e nutrição de leads, com pontuação e jornadas.","Jornada de e-mails para leads de investimento até chegarem ao assessor."),
+I("Partner Relationship Management","add","Portal para gerir parceiros e indicações.","Correspondentes bancários e corretores registram e acompanham indicações de consórcio.")
+]}
+];
+
+var state=null, cur=null, filter="all", query="", slide=0, dragId=null;
+
+function uid(){return "i"+Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function seed(){
+  var s=clone(DEFAULT);
+  s.forEach(function(l){l.itens.forEach(function(it){it.id=uid();it.st="n";it.uso="";it.resp="";it.notas="";});});
+  return {v:1,lanes:s};
+}
+function load(){
+  try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&o.lanes)return o;}}catch(e){}
+  return seed();
+}
+var saveT=null;
+function save(){
+  clearTimeout(saveT);
+  saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}},150);
+}
+function $(id){return document.getElementById(id);}
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
+function find(id){
+  for(var i=0;i<state.lanes.length;i++){var l=state.lanes[i];
+    for(var j=0;j<l.itens.length;j++){if(l.itens[j].id===id)return {lane:l,li:i,item:l.itens[j],idx:j};}}
+  return null;
+}
+function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},1800);}
+
+function counts(items){
+  var c={u:0,p:0,n:0,t:items.length};items.forEach(function(i){c[i.st]++;});return c;
+}
+function allItems(){var a=[];state.lanes.forEach(function(l){a=a.concat(l.itens);});return a;}
+function pct(n,t){return t?Math.round(n*100/t):0;}
+
+function renderKpis(){
+  var c=counts(allItems());
+  var cover=pct(c.u+c.p*0.5,c.t);
+  $("kpis").innerHTML=
+   '<div class="kpi"><b>'+c.t+'</b><span>capacidades mapeadas</span></div>'+
+   '<div class="kpi g"><b>'+c.u+'</b><span>em uso</span></div>'+
+   '<div class="kpi y"><b>'+c.p+'</b><span>parcialmente em uso</span></div>'+
+   '<div class="kpi n"><b>'+c.n+'</b><span>disponíveis para explorar</span></div>'+
+   '<div class="bar"><div class="track"><i style="width:'+pct(c.u,c.t)+'%;background:var(--g-bd)"></i><i style="width:'+pct(c.p,c.t)+'%;background:var(--y-bd)"></i></div>'+
+   '<small>Aproveitamento ponderado da licença: <b>'+cover+'%</b> (em uso = 1, parcial = 0,5)</small></div>';
+}
+
+function cardHtml(it){
+  var who=it.resp?'<span class="who" title="'+esc(it.resp)+'">'+esc(it.resp)+'</span>':'<span></span>';
+  return '<div class="card '+it.st+'" role="button" tabindex="0" draggable="true" data-id="'+it.id+'" title="'+esc(ST[it.st])+'">'+
+    '<button class="st" data-act="cycle" aria-label="Alternar situação: '+ST[it.st]+'"></button>'+
+    '<div class="nm">'+esc(it.nome)+'</div>'+
+    '<div class="ft"><span class="tag">'+LIC[it.lic||"ver"]+'</span>'+who+'</div></div>';
+}
+function match(it){
+  if(filter!=="all"&&it.st!==filter)return false;
+  if(query){var q=query.toLowerCase();
+    if((it.nome+" "+it.oque+" "+it.caso+" "+it.uso+" "+it.resp).toLowerCase().indexOf(q)<0)return false;}
+  return true;
+}
+function renderLanes(){
+  var h="";
+  state.lanes.forEach(function(l){
+    var c=counts(l.itens);
+    h+='<section class="lane" style="--lc:'+l.cor+'" data-lane="'+l.id+'"><div class="lane-h"><h2>'+esc(l.nome)+'<small>'+esc(l.sub||"")+'</small></h2>'+
+      '<span class="mini"><span class="dot u"></span> '+c.u+' &nbsp;<span class="dot p"></span> '+c.p+' &nbsp;<span class="dot"></span> '+c.n+' &nbsp;· '+pct(c.u+c.p*0.5,c.t)+'% aproveitado</span></div>'+
+      '<div class="grid" data-lane="'+l.id+'">';
+    l.itens.forEach(function(it){if(match(it))h+=cardHtml(it);});
+    h+='<button class="add" data-act="add" data-lane="'+l.id+'">+ Nova capacidade</button></div></section>';
+  });
+  $("lanes").innerHTML=h;
+}
+function renderAll(){renderKpis();renderLanes();if(document.body.classList.contains("present"))renderDeck();}
+
+function cycle(id){
+  var f=find(id);if(!f)return;
+  f.item.st=f.item.st==="n"?"u":(f.item.st==="u"?"p":"n");
+  save();renderAll();if(cur===id)syncDrawer();
+}
+
+/* drawer */
+function openDrawer(id){
+  var f=find(id);if(!f)return;cur=id;
+  var sel=$("fLane");sel.innerHTML="";
+  state.lanes.forEach(function(l){var o=document.createElement("option");o.value=l.id;o.textContent=l.nome;sel.appendChild(o);});
+  syncDrawer();
+  $("scrim").classList.add("on");$("drawer").classList.add("on");$("drawer").setAttribute("aria-hidden","false");
+}
+function syncDrawer(){
+  var f=find(cur);if(!f)return;var it=f.item;
+  $("fNome").value=it.nome;$("fOque").value=it.oque;$("fCaso").value=it.caso;
+  $("fUso").value=it.uso;$("fResp").value=it.resp;$("fNotas").value=it.notas||"";
+  $("fLic").value=it.lic||"ver";$("fLane").value=f.lane.id;
+  Array.prototype.forEach.call($("fSt").children,function(b){b.setAttribute("aria-pressed",String(b.dataset.v===it.st));});
+  $("useBox").style.display=it.st==="n"?"none":"block";
+}
+function closeDrawer(){cur=null;$("scrim").classList.remove("on");$("drawer").classList.remove("on");$("drawer").setAttribute("aria-hidden","true");}
+function bindField(elId,key){
+  $(elId).addEventListener("input",function(e){
+    var f=find(cur);if(!f)return;f.item[key]=e.target.value;save();
+    if(key==="nome"||key==="resp"||key==="lic"){renderAll();}
+  });
+}
+bindField("fNome","nome");bindField("fOque","oque");bindField("fCaso","caso");
+bindField("fUso","uso");bindField("fResp","resp");bindField("fNotas","notas");bindField("fLic","lic");
+$("fLic").addEventListener("change",function(e){var f=find(cur);if(f){f.item.lic=e.target.value;save();renderAll();}});
+$("fSt").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;var f=find(cur);if(!f)return;
+  f.item.st=b.dataset.v;save();renderAll();syncDrawer();
+  if(b.dataset.v!=="n")setTimeout(function(){$("fUso").focus();},0);
+});
+$("fLane").addEventListener("change",function(e){
+  var f=find(cur);if(!f)return;var dest=state.lanes.filter(function(l){return l.id===e.target.value;})[0];
+  if(!dest||dest===f.lane)return;
+  f.lane.itens.splice(f.idx,1);dest.itens.push(f.item);save();renderAll();
+});
+$("dDel").addEventListener("click",function(){
+  var f=find(cur);if(!f)return;
+  if(confirm('Excluir "'+f.item.nome+'"?')){f.lane.itens.splice(f.idx,1);save();closeDrawer();renderAll();toast("Bloco excluído");}
+});
+$("dClose").addEventListener("click",closeDrawer);$("dOk").addEventListener("click",closeDrawer);$("scrim").addEventListener("click",closeDrawer);
+
+function addItem(laneId){
+  var l=state.lanes.filter(function(x){return x.id===laneId;})[0];if(!l)return;
+  var it={id:uid(),nome:"Nova capacidade",lic:"ver",oque:"",caso:"",st:"n",uso:"",resp:"",notas:""};
+  l.itens.push(it);save();renderAll();openDrawer(it.id);
+  setTimeout(function(){$("fNome").focus();$("fNome").select();},260);
+}
+
+/* map interactions */
+$("lanes").addEventListener("click",function(e){
+  var a=e.target.closest("[data-act]");
+  if(a&&a.dataset.act==="add"){addItem(a.dataset.lane);return;}
+  var c=e.target.closest(".card");if(!c)return;
+  if(a&&a.dataset.act==="cycle"){e.stopPropagation();cycle(c.dataset.id);return;}
+  openDrawer(c.dataset.id);
+});
+$("lanes").addEventListener("keydown",function(e){
+  if((e.key==="Enter"||e.key===" ")&&e.target.classList.contains("card")){e.preventDefault();openDrawer(e.target.dataset.id);}
+});
+$("lanes").addEventListener("dragstart",function(e){
+  var c=e.target.closest(".card");if(!c)return;dragId=c.dataset.id;c.classList.add("dragging");
+  try{e.dataTransfer.setData("text/plain",dragId);e.dataTransfer.effectAllowed="move";}catch(x){}
+});
+$("lanes").addEventListener("dragend",function(){dragId=null;renderLanes();});
+$("lanes").addEventListener("dragover",function(e){
+  var g=e.target.closest(".grid");if(g&&dragId){e.preventDefault();g.classList.add("over");}
+});
+$("lanes").addEventListener("dragleave",function(e){var g=e.target.closest(".grid");if(g&&!g.contains(e.relatedTarget))g.classList.remove("over");});
+$("lanes").addEventListener("drop",function(e){
+  var g=e.target.closest(".grid");if(!g||!dragId)return;e.preventDefault();
+  var f=find(dragId);if(!f)return;
+  var dest=state.lanes.filter(function(l){return l.id===g.dataset.lane;})[0];
+  var over=e.target.closest(".card");
+  f.lane.itens.splice(f.idx,1);
+  var pos=dest.itens.length;
+  if(over&&over.dataset.id!==dragId){pos=dest.itens.findIndex(function(i){return i.id===over.dataset.id;});if(pos<0)pos=dest.itens.length;}
+  dest.itens.splice(pos,0,f.item);
+  dragId=null;save();renderAll();
+});
+
+/* filters */
+$("q").addEventListener("input",function(e){query=e.target.value.trim();renderLanes();});
+document.querySelector(".tools").addEventListener("click",function(e){
+  var c=e.target.closest(".chip");if(!c)return;filter=c.dataset.f;
+  Array.prototype.forEach.call(document.querySelectorAll(".chip"),function(x){x.setAttribute("aria-pressed",String(x===c));});
+  renderLanes();
+});
+$("bTheme").addEventListener("click",function(){
+  var r=document.documentElement,d=r.getAttribute("data-theme");
+  var dark=d?d==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;
+  r.setAttribute("data-theme",dark?"light":"dark");
+});
+
+/* file ops */
+$("bExp").addEventListener("click",function(){
+  var b=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="mapa-capacidades-salesforce.json";
+  document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+});
+$("bImp").addEventListener("click",function(){$("file").click();});
+$("file").addEventListener("change",function(e){
+  var f=e.target.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){
+    try{var o=JSON.parse(r.result);if(!o||!Array.isArray(o.lanes))throw 0;
+      o.lanes.forEach(function(l){(l.itens||[]).forEach(function(i){i.id=i.id||uid();i.st=i.st||"n";});});
+      state=o;save();renderAll();toast("Importado");}catch(x){toast("Arquivo inválido");}
+  };r.readAsText(f);e.target.value="";
+});
+$("bPrint").addEventListener("click",function(){window.print();});
+$("bReset").addEventListener("click",function(){
+  if(confirm("Restaurar o mapa padrão? Todas as suas edições serão perdidas (exporte antes, se quiser guardar).")){state=seed();save();renderAll();toast("Restaurado");}
+});
+
+/* presentation */
+function slides(){
+  var s=[{t:"cover"},{t:"sum"}];
+  state.lanes.forEach(function(l){s.push({t:"lane",id:l.id});});
+  s.push({t:"opp"});return s;
+}
+function renderDeck(){
+  var S=slides();if(slide>=S.length)slide=S.length-1;if(slide<0)slide=0;
+  var s=S[slide],h="";
+  $("dkInfo").innerHTML="<b>Mapa de Capacidades Salesforce</b> · "+(slide+1)+"/"+S.length;
+  if(s.t==="cover"){
+    h='<div class="cover"><h1>O que a nossa licença Salesforce já nos dá</h1><p class="sub" style="font-size:18px">Mapa de capacidades da plataforma aplicado ao atendimento e ao negócio do banco: cartão, conta digital, consórcio e investimentos.</p><div class="rule">'+
+      state.lanes.map(function(l){return '<i style="background:'+l.cor+'"></i>';}).join("")+'</div>'+
+      '<p class="sub">Verde = em uso · Amarelo = parcial · Cinza = disponível e ainda não explorado.<br><b>Rascunho para validação interna.</b></p></div>';
+  }else if(s.t==="sum"){
+    var c=counts(allItems());
+    h='<h2>Visão geral</h2><p class="sub">'+c.t+' capacidades mapeadas: '+c.u+' em uso, '+c.p+' parciais e '+c.n+' disponíveis para explorar.</p><div class="sum3">'+
+    state.lanes.map(function(l){var k=counts(l.itens);
+      return '<div class="sumc" style="--lc:'+l.cor+'"><h3>'+esc(l.nome)+'</h3><div class="big">'+pct(k.u+k.p*0.5,k.t)+'%</div><small>aproveitamento ponderado</small>'+
+      '<div class="bar" style="margin-top:12px"><div class="track"><i style="width:'+pct(k.u,k.t)+'%;background:var(--g-bd)"></i><i style="width:'+pct(k.p,k.t)+'%;background:var(--y-bd)"></i></div></div>'+
+      '<p style="margin:10px 0 0">'+k.u+' em uso · '+k.p+' parciais · <b>'+k.n+' a explorar</b></p></div>';}).join("")+'</div>';
+  }else if(s.t==="lane"){
+    var l=state.lanes.filter(function(x){return x.id===s.id;})[0];
+    h='<h2 style="border-left:8px solid '+l.cor+';padding-left:12px">'+esc(l.nome)+'</h2><p class="sub">'+esc(l.sub||"")+' · clique em um bloco para ver a explicação.</p><div class="grid">'+l.itens.map(cardHtml).join("")+'</div>';
+  }else{
+    h='<h2>Oportunidades: disponível e ainda não usado</h2><p class="sub">Capacidades em cinza. Itens “Add-on” exigem licença adicional; os demais devem estar cobertos pela licença, sujeito a validação.</p><div class="opp">'+
+    state.lanes.map(function(l){var a=l.itens.filter(function(i){return i.st==="n";});
+      return '<h4 style="color:'+l.cor+'">'+esc(l.nome)+' ('+a.length+')</h4><ul>'+a.map(function(i){return '<li>'+esc(i.nome)+' <span class="tag">'+LIC[i.lic||"ver"]+'</span></li>';}).join("")+'</ul>';}).join("")+'</div>';
+  }
+  $("dkBody").innerHTML=h;
+}
+function present(){document.body.classList.add("present");slide=0;renderDeck();}
+function exitPresent(){document.body.classList.remove("present");renderAll();}
+$("bPres").addEventListener("click",present);
+$("dkExit").addEventListener("click",exitPresent);
+$("dkNext").addEventListener("click",function(){slide++;renderDeck();});
+$("dkPrev").addEventListener("click",function(){slide--;renderDeck();});
+$("dkBody").addEventListener("click",function(e){
+  var a=e.target.closest("[data-act='cycle']");var c=e.target.closest(".card");if(!c)return;
+  if(a){cycle(c.dataset.id);return;}openDrawer(c.dataset.id);
+});
+document.addEventListener("keydown",function(e){
+  var tag=(e.target.tagName||"").toLowerCase();if(tag==="input"||tag==="textarea"||tag==="select")return;
+  if(e.key==="Escape"){if(cur)closeDrawer();else if(document.body.classList.contains("present"))exitPresent();return;}
+  if(document.body.classList.contains("present")&&!cur){
+    if(e.key==="ArrowRight"||e.key==="PageDown"){slide++;renderDeck();}
+    if(e.key==="ArrowLeft"||e.key==="PageUp"){slide--;renderDeck();}
+  }
+});
+
+state=load();renderAll();
+})();
+</script>
+</body>
+</html>
