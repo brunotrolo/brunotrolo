@@ -40,7 +40,8 @@ button{cursor:pointer}
 .btn:hover{border-color:var(--acc)}
 .btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
 .btn.dng{color:#c0392b}
-.actions{display:flex;flex-wrap:wrap;gap:8px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dirty{font-size:12.5px;color:var(--y-ink);background:var(--y-bg);border:1px solid var(--y-bd);border-radius:999px;padding:3px 10px}
 .kpis{display:flex;flex-wrap:wrap;gap:10px;padding:14px 16px 0}
 .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:130px;box-shadow:var(--shadow)}
 .kpi b{font-size:24px;display:block;line-height:1.1}
@@ -140,6 +141,8 @@ body.present .app{display:none}
   <header class="top">
     <h1 id="ttl">Mapa de Capacidades Salesforce<small>Service Cloud Enterprise / Unlimited · Banco: cartão, conta digital, consórcio e investimentos · RASCUNHO – validar contra o contrato (order form)</small></h1>
     <div class="actions">
+      <button class="btn pri" id="bSave" title="Grava as suas edições dentro de um arquivo HTML, para abrir em outro computador ou compartilhar">💾 Salvar HTML</button>
+      <span class="dirty" id="dirty" hidden>● alterações não salvas no arquivo</span>
       <button class="btn pri" id="bPres">▶ Apresentar</button>
       <button class="btn" id="bExp">Exportar JSON</button>
       <button class="btn" id="bImp">Importar JSON</button>
@@ -218,6 +221,7 @@ body.present .app{display:none}
   </div>
 </aside>
 <div class="toast" id="toast"></div>
+<script type="application/json" id="seed-data"></script>
 
 <script>
 (function(){
@@ -324,14 +328,48 @@ function seed(){
   s.forEach(function(l){l.itens.forEach(function(it){it.id=uid();it.st="n";it.uso="";it.resp="";it.notas="";});});
   return {v:1,lanes:s};
 }
+function readJson(txt){try{var o=JSON.parse(txt);return o&&Array.isArray(o.lanes)?o:null;}catch(e){return null;}}
 function load(){
-  try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&o.lanes)return o;}}catch(e){}
+  /* escolhe a versão mais recente entre o que está gravado no próprio HTML e o que está no navegador */
+  var emb=readJson(document.getElementById("seed-data").textContent);
+  var loc=null;try{loc=readJson(localStorage.getItem(KEY));}catch(e){}
+  var best=null;
+  if(emb&&loc)best=(loc.updatedAt||0)>(emb.updatedAt||0)?loc:emb;else best=emb||loc;
+  if(best){dirty=best===loc&&!!emb&&(loc.updatedAt||0)>(emb.updatedAt||0);return best;}
   return seed();
 }
-var saveT=null;
+var saveT=null, dirty=false, fileHandle=null;
+function setDirty(v){dirty=v;var d=document.getElementById("dirty");if(d)d.hidden=!v;}
 function save(){
+  state.updatedAt=Date.now();setDirty(true);
   clearTimeout(saveT);
   saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}},150);
+}
+function buildHtml(){
+  var root=document.documentElement.cloneNode(true);
+  var q=function(s){return root.querySelector(s);};
+  ["#lanes","#kpis","#dkBody","#dkInfo","#fLane"].forEach(function(s){var n=q(s);if(n)n.innerHTML="";});
+  q("body").classList.remove("present");
+  ["#scrim","#drawer"].forEach(function(s){q(s).classList.remove("on");});
+  q("#drawer").setAttribute("aria-hidden","true");
+  q("#toast").classList.remove("on");q("#dirty").hidden=true;
+  q("#seed-data").textContent=JSON.stringify(state).replace(/</g,"\\u003c");
+  return "<!doctype html>\n"+root.outerHTML;
+}
+function saveHtml(){
+  var html=buildHtml(),blob=new Blob([html],{type:"text/html"});
+  function fallback(){
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="mapa-capacidades-salesforce.html";
+    document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+    setDirty(false);toast("Arquivo HTML baixado");
+  }
+  if(window.showSaveFilePicker){
+    (fileHandle?Promise.resolve(fileHandle):window.showSaveFilePicker({suggestedName:"mapa-capacidades-salesforce.html",types:[{description:"Página HTML",accept:{"text/html":[".html"]}}]}))
+    .then(function(h){fileHandle=h;return h.createWritable();})
+    .then(function(w){return w.write(blob).then(function(){return w.close();});})
+    .then(function(){setDirty(false);toast("Salvo no arquivo");})
+    .catch(function(e){if(e&&e.name==="AbortError")return;fileHandle=null;fallback();});
+  }else fallback();
 }
 function $(id){return document.getElementById(id);}
 function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML;}
@@ -488,6 +526,9 @@ $("bTheme").addEventListener("click",function(){
 });
 
 /* file ops */
+$("bSave").addEventListener("click",saveHtml);
+window.addEventListener("beforeunload",function(e){if(dirty){e.preventDefault();e.returnValue="";}});
+document.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"){e.preventDefault();saveHtml();}});
 $("bExp").addEventListener("click",function(){
   var b=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
   var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="mapa-capacidades-salesforce.json";
@@ -557,7 +598,7 @@ document.addEventListener("keydown",function(e){
   }
 });
 
-state=load();renderAll();
+state=load();renderAll();setDirty(dirty);
 })();
 </script>
 </body>
