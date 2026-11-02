@@ -1,0 +1,16 @@
+--- a/tools/check_livekit.py
++++ b/tools/check_livekit.py
+@@ -34,10 +34,10 @@
+     elif len(read(p).splitlines()) < 40:
+         warns.append(f"documento suspeito de raso: Voz via LiveKit/{doc}")
+ 
+-# 2. adr/ tem 11 arquivos
++# 2. adr/ tem 12 arquivos (0012 = visualizador oficial LiveKit, substitui parcialmente o 0011)
+ adr_files = sorted(glob.glob(os.path.join(ADR_DIR, "*.md")))
+-if len(adr_files) != 11:
+-    errors.append(f"adr/ tem {len(adr_files)} arquivos, esperado 11")
++if len(adr_files) != 12:
++    errors.append(f"adr/ tem {len(adr_files)} arquivos, esperado 12")
+ if not adr_files:
+     errors.append("adr/ vazio ou ausente")
+ 

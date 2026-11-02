@@ -1,0 +1,121 @@
+--- a/client-web/index.html
++++ b/client-web/index.html
+@@ -7,6 +7,8 @@
+ <link rel="manifest" href="manifest.json"/>
+ <meta name="theme-color" content="#0a0a0a"/>
+ <script src="https://unpkg.com/livekit-client@2.11.0/dist/livekit-client.umd.js"></script>
++<link rel="stylesheet" href="agent-viz.css?v=1"/>
++<script src="agent-viz.js?v=1" defer></script>
+ <style>
+ /* ===== Tema Papel (vintage claro, padrão) ===== */
+ :root, html[data-theme="livekit"] {
+@@ -249,6 +251,10 @@
+ <!-- Visualizador LiveKit único -->
+ <div class="lk-card" id="lkVis">
+   <canvas id="lkBars" height="120"></canvas>
++  <div id="lkViz" style="color:#fff;display:none;height:240px;align-items:center;justify-content:center;overflow:hidden"></div>
++  <div id="lkTag" aria-live="off" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px;height:16px;font-size:.7rem;color:#52525b;letter-spacing:.02em">
++    <span id="lkDot" style="width:7px;height:7px;border-radius:50%;background:#3f3f46;transition:background .15s"></span><span id="lkTagTxt"></span>
++  </div>
+ </div>
+ 
+ <div id="audioBanner"> Desconectado. Clique em Join.</div>
+@@ -262,6 +268,15 @@
+ <details id="configAccordion" class="card">
+   <summary style="cursor:pointer;font-weight:600;list-style:none">Configurações avançadas</summary>
+   <div class="row">
++    <label for="vizType">Tipo do gráfico de áudio:</label>
++    <select id="vizType" title="Visual do medidor de áudio">
++      <option value="bar" selected>Bar</option>
++      <option value="radial">Radial</option>
++      <option value="wave">Wave</option>
++      <option value="aura">Aura</option>
++    </select>
++  </div>
++  <div class="row">
+     <label for="wsUrl">WS URL:</label>
+     <input id="wsUrl" value=""/>
+   </div>
+@@ -303,7 +318,7 @@
+   <div id="error" role="alert"></div>
+   <pre id="log"></pre>
+   <details><summary>Diagnóstico do navegador</summary><pre id="diag"></pre></details>
+-  <div class="hint" id="ver">versão: 2026-11-02-single (se não vir esta linha, recarregue com Ctrl+Shift+R)</div>
++  <div class="hint" id="ver">versão: 2026-11-02-viz (se não vir esta linha, recarregue com Ctrl+Shift+R)</div>
+ </div>
+ </div>
+ <div id="audioSink" style="display:none"></div>
+@@ -479,6 +494,63 @@
+     for(let i=0;i<bars;i++) barPeaks[i] *= 0.85;
+   }
+ }
++// ---------- Seletor de visual (Bar | Radial | Wave | Aura) + marcador mic/fone ----------
++const vizSel = document.getElementById('vizType');
++const lkViz = document.getElementById('lkViz');
++let vizMode = 'bar', vizHandle = null, _lastViz = 0;
++try {
++  const saved = localStorage.getItem('vizType');
++  if (saved && [...vizSel.options].some(o => o.value === saved)) vizMode = saved;
++} catch (e) { /* localStorage indisponível: segue com o padrão */ }
++vizSel.value = vizMode;
++vizSel.addEventListener('change', () => {
++  vizMode = vizSel.value;
++  try { localStorage.setItem('vizType', vizMode); } catch (e) {}
++});
++function pickAnalyser(talking, hearing) {
++  if (talking && localAnalyser) return localAnalyser.analyser;
++  if (hearing.length && remoteAnalysers[hearing[0]]) return remoteAnalysers[hearing[0]].analyser;
++  return null;
++}
++function drawViz(talking, hearing) {
++  // Sem o bundle (offline/bloqueado/404): mantém o gráfico antigo (ADR-0011)
++  if (!window.AgentVizBridge) {
++    lkBars.style.display = ''; lkViz.style.display = 'none';
++    drawBars(lkBars, localAnalyser, remoteAnalysers, talking, hearing);
++    return;
++  }
++  const now = performance.now();
++  if (now - _lastViz < 33) return;            // ~30 fps: metade do custo de render do React
++  _lastViz = now;
++  lkBars.style.display = 'none'; lkViz.style.display = 'flex';
++  vizHandle ??= window.AgentVizBridge.mount(lkViz);
++  const an = pickAnalyser(talking, hearing);
++  const active = !!an && (talking || hearing.length > 0);
++  let bands = [0, 0, 0, 0, 0], volume = 0;
++  if (an) {
++    const f = new Uint8Array(an.frequencyBinCount); an.getByteFrequencyData(f);
++    const per = Math.floor(f.length * 0.5 / 5) || 1;   // 5 faixas sobre a metade grave/média do espectro (voz)
++    bands = bands.map((_, i) => {
++      let m = 0; for (let k = i * per; k < (i + 1) * per; k++) m = Math.max(m, f[k] || 0);
++      return Math.min(1, m / 255 * 1.2);
++    });
++    volume = Math.min(1, bands.reduce((a, b) => a + b, 0) / 5 * 1.5);
++  }
++  vizHandle.update({ mode: vizMode, state: !room ? 'disconnected' : active ? 'speaking' : 'listening', bands, volume });
++}
++// Marcador discreto: bolinha + texto. Única marcação de cor da tela (os gráficos usam as cores oficiais).
++const TAG = { mic: ['#22c55e', 'mic'], fone: ['#ef4444', 'fone'], both: ['#facc15', 'mic | fone'], idle: ['#3f3f46', ''] };
++const lkDot = document.getElementById('lkDot'), lkTagTxt = document.getElementById('lkTagTxt');
++let _tagKey = '', _lastTalk = 0;
++const TAG_HOLD_MS = 700;                      // o "falando" local não tem retenção (limiar RMS a cada 300 ms): evita a bolinha piscar entre palavras
++function updateTag(talking, hearing) {
++  const now = performance.now();
++  if (talking) _lastTalk = now;
++  const micOn = talking || (now - _lastTalk < TAG_HOLD_MS);
++  const key = micOn && hearing.length ? 'both' : micOn ? 'mic' : hearing.length ? 'fone' : 'idle';
++  if (key === _tagKey) return;                // só mexe no DOM quando o estado muda
++  _tagKey = key; lkDot.style.background = TAG[key][0]; lkTagTxt.textContent = TAG[key][1];
++}
+ // Agulhas removidas
+ function paintStage() {
+   const remoteIds = Object.keys(remoteAnalysers);
+@@ -490,7 +562,8 @@
+     log('INFO','Canal',{estado:st});
+   }
+   // draw bars
+-  drawBars(lkBars, localAnalyser, remoteAnalysers, talking, hearing);
++  updateTag(talking, hearing);
++  drawViz(talking, hearing);
+   requestAnimationFrame(paintStage);
+ }
+ paintStage._last='';

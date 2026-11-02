@@ -1,0 +1,26 @@
+--- a/call-ingress/server.js
++++ b/call-ingress/server.js
+@@ -176,6 +176,23 @@
+     return;
+   }
+ 
++  // Assets do visualizador (bundle gerado por client-web/viz). Lista FECHADA: sem path traversal.
++  const VIZ_ASSETS = {
++    '/agent-viz.js': 'application/javascript; charset=utf-8',
++    '/agent-viz.css': 'text/css; charset=utf-8',
++  };
++  if (Object.hasOwn(VIZ_ASSETS, parsed.pathname)) {
++    try {
++      const file = path.join(__dirname, '..', 'client-web', path.basename(parsed.pathname));
++      res.writeHead(200, { 'Content-Type': VIZ_ASSETS[parsed.pathname], 'Cache-Control': 'no-cache' });
++      res.end(fs.readFileSync(file));
++    } catch (e) {
++      res.writeHead(404);
++      res.end();
++    }
++    return;
++  }
++
+   if (parsed.pathname === '/token') {
+     try {
+       const callId = (parsed.query.callId || 'test').toString();
