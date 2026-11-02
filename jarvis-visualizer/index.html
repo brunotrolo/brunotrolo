@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jarvis Visualizer</title>
+<style>
+  :root{--c:#3fd8ff;--bg:#02070d}
+  html,body{margin:0;height:100%;background:var(--bg);color:#bfefff;font-family:system-ui,sans-serif}
+  #wrap{display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px}
+  canvas{width:min(92vw,520px);height:min(92vw,520px)}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  button,select{background:#06202d;color:#bfefff;border:1px solid #1f6f8a;border-radius:6px;padding:8px 12px}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="viz"></canvas>
+  <div class="bar">
+    <button id="mic">🎤 Microfone</button>
+    <button id="demo">🔊 Som de teste</button>
+    <select id="mode">
+      <option value="reactor">Arc Reactor (anéis)</option>
+      <option value="radial">Radial (barras circulares)</option>
+      <option value="orb">Orb (onda viva)</option>
+    </select>
+  </div>
+  <small id="status">parado</small>
+</div>
+<script>
+/* JarvisViz: recebe qualquer MediaStream (mic local ou track remoto do LiveKit). */
+const JarvisViz = (() => {
+  const cv = document.getElementById('viz'), ctx = cv.getContext('2d');
+  let ac, analyser, freq, wave, src, mode = 'reactor', level = 0, t = 0, running = false;
+  const DPR = Math.min(devicePixelRatio || 1, 2);
+  function resize(){ const r = cv.getBoundingClientRect(); cv.width = r.width*DPR; cv.height = r.height*DPR; }
+  addEventListener('resize', resize); resize();
+
+  function ensureCtx(){
+    ac ??= new AudioContext();
+    if (ac.state === 'suspended') ac.resume();
+    if (!analyser){
+      analyser = ac.createAnalyser(); analyser.fftSize = 512; analyser.smoothingTimeConstant = 0.8;
+      freq = new Uint8Array(analyser.frequencyBinCount); wave = new Uint8Array(analyser.fftSize);
+    }
+  }
+  function attachStream(stream){            // mic ou LiveKit: new MediaStream([track.mediaStreamTrack])
+    ensureCtx(); src?.disconnect();
+    src = ac.createMediaStreamSource(stream); src.connect(analyser);  // não conecta no destino: sem eco
+    start();
+  }
+  function attachNode(node, audible=true){  // fonte de teste
+    ensureCtx(); src?.disconnect(); src = node; node.connect(analyser);
+    if (audible) analyser.connect(ac.destination);
+    start();
+  }
+  function start(){ if(!running){ running = true; requestAnimationFrame(draw); } }
+
+  function draw(){
+    t += 0.016;
+    const w = cv.width, h = cv.height, cx = w/2, cy = h/2, R = Math.min(w,h)*0.28;
+    if (analyser){ analyser.getByteFrequencyData(freq); analyser.getByteTimeDomainData(wave); }
+    let sum = 0; if (freq) for (let i=0;i<freq.length;i++) sum += freq[i];
+    const target = freq ? sum/freq.length/255 : 0;
+    level += (target - level)*0.2;
+    ctx.globalCompositeOperation = 'source-over'; ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(2,7,13,0.35)'; ctx.fillRect(0,0,w,h);   // rastro
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.shadowColor = '#3fd8ff'; ctx.shadowBlur = 18*DPR;
+    ({reactor, radial, orb})[mode](cx,cy,R);
+    // núcleo pulsante comum
+    const g = ctx.createRadialGradient(cx,cy,0,cx,cy,R*(0.35+level*0.6));
+    g.addColorStop(0,'rgba(220,250,255,.95)'); g.addColorStop(.4,'rgba(63,216,255,.5)'); g.addColorStop(1,'rgba(63,216,255,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx,cy,R*(0.35+level*0.6),0,Math.PI*2); ctx.fill();
+    window.__vizLevel = level;  // usado na validação
+    requestAnimationFrame(draw);
+  }
+  function arc(cx,cy,r,a0,a1,lw,alpha){
+    ctx.strokeStyle = `rgba(63,216,255,${alpha})`; ctx.lineWidth = lw*DPR;
+    ctx.beginPath(); ctx.arc(cx,cy,r,a0,a1); ctx.stroke();
+  }
+  function reactor(cx,cy,R){
+    const k = 1+level*0.5;
+    for (let i=0;i<4;i++){                       // anéis segmentados girando em sentidos opostos
+      const r = R*(0.7+i*0.25)*k, seg = 6+i*4, rot = t*(i%2?-1:1)*(0.3+i*0.15);
+      for (let s=0;s<seg;s++){
+        const a = rot + s*2*Math.PI/seg, f = freq ? freq[(s*7+i*13)%120]/255 : 0;
+        arc(cx,cy,r,a,a+(Math.PI*2/seg)*(0.35+f*0.55),2+f*4,0.35+f*0.65);
+      }
+    }
+    // ticks externos
+    ctx.strokeStyle='rgba(63,216,255,.4)'; ctx.lineWidth=1*DPR;
+    for (let i=0;i<72;i++){ const a=i*Math.PI/36-t*0.1, r1=R*1.65, r2=r1+(i%6?4:10)*DPR;
+      ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1); ctx.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2); ctx.stroke(); }
+  }
+  function radial(cx,cy,R){
+    const n = 96; ctx.lineCap='round';
+    for (let i=0;i<n;i++){
+      const f = freq ? freq[Math.floor((i<n/2?i:n-i)*1.6)]/255 : 0;  // espelhado = simétrico
+      const a = i*2*Math.PI/n - Math.PI/2, r1 = R*0.9, r2 = r1 + 4*DPR + f*R*0.9;
+      ctx.strokeStyle = `rgba(63,216,255,${0.3+f*0.7})`; ctx.lineWidth = 3*DPR;
+      ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1); ctx.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2); ctx.stroke();
+    }
+    arc(cx,cy,R*0.85,0,Math.PI*2,1.5,0.6);
+  }
+  function orb(cx,cy,R){
+    for (let layer=0;layer<3;layer++){            // 3 contornos ondulando com a forma de onda
+      ctx.strokeStyle = `rgba(${[63,140,200][layer]},${[216,180,120][layer]},255,.8)`; ctx.lineWidth = 2*DPR;
+      ctx.beginPath();
+      for (let i=0;i<=128;i++){
+        const a = i/128*Math.PI*2, wv = wave ? (wave[(i*3+layer*40)%wave.length]-128)/128 : 0;
+        const r = R*(1+level*0.4) + wv*R*0.5 + Math.sin(a*3+t*(1+layer))*R*0.04*(1+level*4);
+        const x = cx+Math.cos(a)*r, y = cy+Math.sin(a)*r; i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+      }
+      ctx.closePath(); ctx.stroke();
+    }
+  }
+  return { attachStream, attachNode, setMode: m => mode = m, get ctx(){ ensureCtx(); return ac; } };
+})();
+
+document.getElementById('mode').onchange = e => JarvisViz.setMode(e.target.value);
+document.getElementById('mic').onclick = async () => {
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+    JarvisViz.attachStream(s); document.getElementById("status").textContent = 'microfone ativo';
+  } catch(e){ document.getElementById("status").textContent = 'erro: '+e.message; }
+};
+document.getElementById('demo').onclick = () => {   // voz sintética: 2 osciladores + LFO de amplitude
+  const ac = JarvisViz.ctx, g = ac.createGain(), lfo = ac.createOscillator(), lg = ac.createGain();
+  [140, 420].forEach(f => { const o = ac.createOscillator(); o.type='sawtooth'; o.frequency.value=f; o.connect(g); o.start(); });
+  g.gain.value = 0.05; lfo.frequency.value = 3; lg.gain.value = 0.05; lfo.connect(lg).connect(g.gain); lfo.start();
+  JarvisViz.attachNode(g); document.getElementById("status").textContent = 'som de teste';
+};
+window.JarvisViz = JarvisViz;
+</script>
+</body>
+</html>

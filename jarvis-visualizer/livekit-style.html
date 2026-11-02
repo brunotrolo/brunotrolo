@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Visualizers</title>
+<style>
+  :root{--bg:#05070a;--fg:#d8f6ff}
+  html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif}
+  #wrap{display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px}
+  canvas{width:min(92vw,480px);height:min(92vw,480px);border-radius:16px;background:#080b10}
+  .row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+  button{background:#0d1a24;color:var(--fg);border:1px solid #23485a;border-radius:8px;padding:8px 12px;font-size:14px}
+  button.on{background:#1fb6e6;color:#001018;border-color:#1fb6e6}
+  small{opacity:.7}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="viz"></canvas>
+  <div class="row" id="modes"></div>
+  <div class="row" id="states"></div>
+  <div class="row"><button id="mic">🎤 Microfone</button><button id="demo">🔊 Som de teste</button></div>
+  <small id="st">parado</small>
+</div>
+<script>
+/* AgentViz — Bar / Radial / Wave / Aura em Canvas puro, inspirado nos visualizadores do LiveKit Agents UI.
+   Uso com LiveKit:  AgentViz.attachStream(new MediaStream([track.mediaStreamTrack]));
+                     AgentViz.setState(agent.state)  // 'listening' | 'thinking' | 'speaking' | 'idle' */
+const AgentViz = (() => {
+  const cv = document.getElementById('viz'), g = cv.getContext('2d');
+  const DPR = Math.min(devicePixelRatio||1, 2);
+  let ac, an, fq, wv, src, mode='aura', state='listening', lvl=0, t=0, run=false;
+  const bands = new Float32Array(48);
+  const fit = () => { const r=cv.getBoundingClientRect(); cv.width=r.width*DPR; cv.height=r.height*DPR; };
+  addEventListener('resize', fit); fit();
+
+  function ctx(){ ac ??= new AudioContext(); if(ac.state==='suspended') ac.resume();
+    if(!an){ an=ac.createAnalyser(); an.fftSize=1024; an.smoothingTimeConstant=.75;
+      fq=new Uint8Array(an.frequencyBinCount); wv=new Uint8Array(an.fftSize); } return ac; }
+  function attachStream(s){ ctx(); src?.disconnect(); src=ac.createMediaStreamSource(s); src.connect(an); go(); }
+  function attachNode(n){ ctx(); src?.disconnect(); src=n; n.connect(an); an.connect(ac.destination); go(); }
+  function go(){ if(!run){ run=true; requestAnimationFrame(frame); } }
+
+  // agrupa o espectro (voz: ~80Hz–5kHz) em N bandas logarítmicas
+  function readBands(){
+    if(!an){ bands.fill(0); return; }
+    an.getByteFrequencyData(fq); an.getByteTimeDomainData(wv);
+    const ny = ac.sampleRate/2, n = bands.length;
+    for(let i=0;i<n;i++){
+      const f0 = 80*Math.pow(5000/80, i/n), f1 = 80*Math.pow(5000/80,(i+1)/n);
+      const b0 = Math.floor(f0/ny*fq.length), b1 = Math.max(b0+1, Math.floor(f1/ny*fq.length));
+      let m=0; for(let b=b0;b<b1;b++) m=Math.max(m,fq[b]);
+      const v = Math.max(0,(m/255-.15)/.85);
+      bands[i] += (v-bands[i])*(v>bands[i]?.5:.15);   // ataque rápido, queda suave
+    }
+  }
+
+  function frame(){
+    t += 1/60; readBands();
+    let s=0; for(const b of bands) s+=b; const target = s/bands.length;
+    lvl += (target-lvl)*.2;
+    const w=cv.width, h=cv.height;
+    g.globalCompositeOperation='source-over'; g.shadowBlur=0;
+    g.fillStyle='#080b10'; g.fillRect(0,0,w,h);
+    ({bar,radial,wave,aura})[mode](w,h);
+    window.__vizLevel = lvl;
+    requestAnimationFrame(frame);
+  }
+
+  // estado do agente: 'thinking' troca o áudio por animação procedural; 'idle' acalma
+  const amp = i => state==='thinking' ? (.25+.25*Math.sin(t*4 - i*.6))
+                 : state==='idle' ? bands[i]*.3 : bands[i];
+  const C = (a=1) => `rgba(31,182,230,${a})`;
+
+  function bar(w,h){
+    const n=5, bw=w*.09, gap=w*.05, x0=(w-(n*bw+(n-1)*gap))/2, cy=h/2;
+    g.fillStyle=C(); g.shadowColor=C(); g.shadowBlur=20*DPR;
+    for(let i=0;i<n;i++){
+      const k = amp([2,6,12,20,30][i]);              // bandas de grave → agudo
+      const bh = bw + k*h*.55;
+      const x = x0+i*(bw+gap);
+      g.globalAlpha = .45+.55*Math.min(1,k*1.5);
+      g.beginPath(); g.roundRect(x, cy-bh/2, bw, bh, bw/2); g.fill();
+    }
+    g.globalAlpha=1;
+  }
+
+  function radial(w,h){
+    const cx=w/2, cy=h/2, R=Math.min(w,h)*.2, n=48;
+    g.lineCap='round'; g.shadowColor=C(); g.shadowBlur=12*DPR;
+    for(let i=0;i<n;i++){
+      const k = amp(i<n/2 ? i : n-1-i), a = i/n*Math.PI*2 - Math.PI/2 + (state==='thinking'?t*.8:0);
+      const r1=R, r2=R+6*DPR+k*R*1.1;
+      g.strokeStyle=C(.35+.65*Math.min(1,k*1.4)); g.lineWidth=Math.max(3*DPR, R*.09);
+      g.beginPath(); g.moveTo(cx+Math.cos(a)*r1, cy+Math.sin(a)*r1); g.lineTo(cx+Math.cos(a)*r2, cy+Math.sin(a)*r2); g.stroke();
+    }
+  }
+
+  function wave(w,h){
+    const cy=h/2, A=h*.28;
+    g.shadowColor=C(); g.shadowBlur=16*DPR;
+    for(const [lw,a,ph,sp] of [[4,1,0,1],[2,.45,1.7,1.3],[1.5,.25,3.1,.7]]){
+      g.strokeStyle=C(a); g.lineWidth=lw*DPR; g.beginPath();
+      for(let x=0;x<=w;x+=2*DPR){
+        const u=x/w, env=Math.sin(Math.PI*u)**2;      // afina nas pontas
+        const k = state==='thinking' ? .25 : (state==='idle'? lvl*.3 : lvl);
+        const y = cy + env*A*(.06+k*1.6)*(Math.sin(u*12+t*6*sp+ph)*.6 + Math.sin(u*27-t*9*sp+ph)*.4);
+        x?g.lineTo(x,y):g.moveTo(x,y);
+      }
+      g.stroke();
+    }
+  }
+
+  function aura(w,h){
+    const cx=w/2, cy=h/2, R=Math.min(w,h)*.22;
+    const k = state==='thinking' ? .3+.15*Math.sin(t*3) : state==='idle' ? .1 : lvl;
+    g.globalCompositeOperation='lighter';
+    // blobs orgânicos girando, cada um puxado por uma faixa do espectro
+    const cols=[[31,182,230],[120,90,255],[0,230,200],[80,150,255]];
+    for(let j=0;j<4;j++){
+      const a = t*(.35+j*.12)*(j%2?-1:1) + j*1.6;
+      const d = R*(.12+ k*.25 + .06*Math.sin(t*1.3+j));
+      const x = cx+Math.cos(a)*d, y = cy+Math.sin(a*1.3)*d;
+      const r = R*(1.1 + amp(j*10+4)*1.2);
+      const gr = g.createRadialGradient(x,y,0,x,y,r);
+      const [c1,c2,c3]=cols[j];
+      gr.addColorStop(0,`rgba(${c1},${c2},${c3},.55)`); gr.addColorStop(.5,`rgba(${c1},${c2},${c3},.18)`); gr.addColorStop(1,`rgba(${c1},${c2},${c3},0)`);
+      g.fillStyle=gr; g.beginPath(); g.arc(x,y,r,0,Math.PI*2); g.fill();
+    }
+    // borda deformada pelo áudio
+    g.globalCompositeOperation='source-over';
+    g.strokeStyle=C(.7); g.lineWidth=2*DPR; g.shadowColor=C(); g.shadowBlur=24*DPR; g.beginPath();
+    for(let i=0;i<=96;i++){
+      const a=i/96*Math.PI*2;
+      const r=R*(1+k*.35) + R*(.03+k*.12)*(Math.sin(a*3+t*2)+.6*Math.sin(a*5-t*3));
+      const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r; i?g.lineTo(x,y):g.moveTo(x,y);
+    }
+    g.closePath(); g.stroke();
+  }
+
+  go();  // anima mesmo sem áudio (thinking/idle)
+  return { attachStream, attachNode, setMode:m=>mode=m, setState:s=>state=s, get ctx(){ return ctx(); } };
+})();
+
+// UI de teste
+const mk = (id, items, cur, fn) => { const box=document.getElementById(id);
+  items.forEach(([v,l])=>{ const b=document.createElement('button'); b.textContent=l; if(v===cur) b.className='on';
+    b.onclick=()=>{ [...box.children].forEach(c=>c.className=''); b.className='on'; fn(v); }; box.append(b); }); };
+mk('modes', [['bar','Bar'],['radial','Radial'],['wave','Wave'],['aura','Aura']], 'aura', AgentViz.setMode);
+mk('states', [['listening','Ouvindo'],['thinking','Pensando'],['speaking','Falando'],['idle','Ocioso']], 'listening', AgentViz.setState);
+const st = document.getElementById('st');
+document.getElementById('mic').onclick = async () => {
+  try { AgentViz.attachStream(await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})); st.textContent='microfone ativo'; }
+  catch(e){ st.textContent='erro: '+e.message; }
+};
+document.getElementById('demo').onclick = () => {
+  const ac=AgentViz.ctx, out=ac.createGain(), lfo=ac.createOscillator(), lg=ac.createGain();
+  [140,420,900].forEach(f=>{ const o=ac.createOscillator(); o.type='sawtooth'; o.frequency.value=f; o.connect(out); o.start(); });
+  out.gain.value=.04; lfo.frequency.value=3; lg.gain.value=.04; lfo.connect(lg).connect(out.gain); lfo.start();
+  AgentViz.attachNode(out); st.textContent='som de teste';
+};
+window.AgentViz = AgentViz;
+</script>
+</body>
+</html>
